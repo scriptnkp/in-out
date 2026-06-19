@@ -1,8 +1,10 @@
 // js/app.js
+// ลิงก์ Web App API ของพี่ (สำหรับติดต่อกับตาราง Weights ใน Google Sheets)
 const API_URL = "https://script.google.com/macros/s/AKfycbxF6cy4_Xd2I30ePPqQFF3qeYPn77CldMsewIzePotdsXsEvwdzX1QdWXPeiucfaVNU9Q/exec";
 let currentViewData = [];
 let cloudWeightsMap = {};
 
+// ฟังก์ชันสลับหน้าแท็บ (ตรวจสอบโครงข่าย / ตั้งค่าน้ำหนัก)
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -12,17 +14,17 @@ function switchTab(tabId) {
     }
 }
 
-// ค้นหาและคำนวณแบบ Real-time รวดเร็วแม่นยำสูง
+// ค้นหาและคำนวณน้ำหนักรายโครงข่ายแบบ Real-time
 async function searchNetworkData() {
     const targetNetId = document.getElementById('network-input').value.trim();
     if (!targetNetId) return alert('กรุณาระบุรหัสโครงข่ายก่อนค้นหา');
 
     const tbody = document.getElementById('result-tbody');
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">⏳ กำลังเรียกตารางน้ำหนักพัสดุล่าสุดจาก Google Sheets...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">⏳ กำลังดึงตารางน้ำหนักอุปกรณ์พัสดุล่าสุดจาก Google Sheets...</td></tr>`;
     document.getElementById('result-card').classList.remove('hidden');
 
     try {
-        // 1. ดึงข้อมูลตารางน้ำหนักพัสดุจากหน้าตาราง Weights ใน Google Sheets มาพักรอไว้
+        // 1. ดึงข้อมูลตารางน้ำหนักล่าสุดจากหน้าตาราง Weights ใน Google Sheets มารอไว้
         const res = await fetch(`${API_URL}?action=get_all_weights`);
         const json = await res.json();
         cloudWeightsMap = {};
@@ -32,13 +34,13 @@ async function searchNetworkData() {
             });
         }
 
-        // 2. ตรวจสอบและกรองข้อมูลโครงข่ายที่ส่งมาจาก window.sapData (ในไฟล์ js/data.js)
+        // 2. ตรวจสอบข้อมูลโครงข่ายพัสดุที่ถูกสร้างมาจากสคริปต์ Python (window.sapData)
         if (typeof window.sapData === 'undefined') {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">❌ ไม่พบตัวแปรฐานข้อมูลในไฟล์ data.js กรุณาตรวจสอบการรันของบอท</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">❌ ไม่พบตัวแปรฐานข้อมูลในไฟล์ data.js กรุณาเช็กการรันใน GitHub</td></tr>`;
             return;
         }
 
-        // ใช้คำสั่งกรอง (Filter) ค้นหาข้อมูลรหัสโครงข่ายที่ป้อนอย่างตรงไปตรงมา
+        // ทำการกรอง (Filter) ข้อมูล โดยจับคู่รหัสโครงข่ายตรงๆ ตามคีย์ที่ Python ปล่อยออกมา
         currentViewData = window.sapData.filter(item => String(item.network).trim() === targetNetId);
         renderResultTable();
 
@@ -48,20 +50,20 @@ async function searchNetworkData() {
     }
 }
 
-// ขับเคลื่อนข้อมูลออกแสดงผลบนตารางพร้อมคำนวณผลรวมน้ำหนักสุทธิ
+// วาดตารางข้อมูลและคำนวณผลรวมน้ำหนักสุทธิสุทธิ
 function renderResultTable() {
     const tbody = document.getElementById('result-tbody');
     tbody.innerHTML = '';
     let grandTotal = 0;
 
     if (currentViewData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">❌ ไม่พบข้อมูลวัสดุอุปกรณ์พัสดุสำหรับรหัสโครงข่ายนี้</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">❌ ไม่พบข้อมูลวัสดุพัสดุสำหรับรหัสโครงข่ายนี้</td></tr>`;
         document.getElementById('grand-total-val').innerText = '0.00';
         return;
     }
 
     currentViewData.forEach((item, index) => {
-        // วิ่งชนข้อมูลเพื่อจับคู่น้ำหนักวัสดุจาก Google Sheets
+        // วิ่งไปจับคู่น้ำหนักจาก Google Sheets โดยใช้รหัสพัสดุเป็นตัวชน
         const weightInfo = cloudWeightsMap[item.materialCode] || { weight: 0.00, unit: 'กก.' };
         const totalRowWeight = item.diffQty * weightInfo.weight;
         grandTotal += totalRowWeight;
@@ -85,13 +87,15 @@ function renderResultTable() {
     document.getElementById('grand-total-val').innerText = grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 }
 
+// ลบแถวพัสดุที่ไม่ต้องการออกชั่วคราวก่อนกดพิมพ์รายงาน ออกกระดาษ A4
 function removeItem(idx) {
-    if(confirm('คุณต้องการลบพัสดุรายการนี้ออกจากการพิมพ์หน้ารายงานปัจจุบันใช่หรือไม่?')) {
+    if(confirm('คุณต้องการลบพัสดุรายการนี้ออกจากการพิมพ์รายงานปัจจุบันใช่หรือไม่?')) {
         currentViewData.splice(idx, 1);
         renderResultTable();
     }
 }
 
+// ส่วนหน้าตั้งค่า: บันทึกและส่งค่าน้ำหนักใหม่กลับไปอัปเดตที่ Google Sheets
 async function saveWeight(e) {
     e.preventDefault();
     const materialCode = document.getElementById('form-code').value.trim();
@@ -110,10 +114,11 @@ async function saveWeight(e) {
             loadWeightTable();
         }
     } catch (err) {
-        alert('เชื่อมต่อฐานข้อมูลล้มเหลว');
+        alert('เชื่อมต่อฐานข้อมูล Google ล้มเหลว');
     }
 }
 
+// โหลดรายการน้ำหนักพัสดุทั้งหมดจาก Google Sheets มาแสดงในหน้าตั้งค่า
 async function loadWeightTable() {
     const tbody = document.getElementById('weight-list-tbody');
     tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">กำลังโหลดรายการน้ำหนักวัสดุจากระบบคลาวด์...</td></tr>`;
@@ -136,6 +141,7 @@ async function loadWeightTable() {
     } catch (e) { tbody.innerHTML = `<tr><td colspan="4">โหลดข้อมูลล้มเหลว</td></tr>`; }
 }
 
+// ดึงค่าน้ำหนักจากตารางขึ้นไปเติมบนฟอร์มเพื่อแก้ไขด่วน
 function pullToEdit(code, weight, unit) {
     document.getElementById('form-code').value = code;
     document.getElementById('form-weight').value = weight;
