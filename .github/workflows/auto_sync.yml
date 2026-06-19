@@ -10,12 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-python@v5
         with: 
           python-version: '3.10'
-          
-      # บรรทัดนี้สำคัญมาก! คือการสั่งติดตั้งตัวส่งข้อมูลก่อนรัน
       - run: pip install requests
-      
       - run: python sync_to_gas.py
