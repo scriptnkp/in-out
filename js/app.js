@@ -9,7 +9,7 @@ function switchTab(tabId) {
     if (event && event.currentTarget) event.currentTarget.classList.add('active');
 }
 
-// ฟังก์ชันค้นหาข้อมูลแบบออฟไลน์ความเร็วสูงจากโครงสร้างรันไฟล์คู่ของพี่
+// ค้นหาข้อมูลแบบออฟไลน์ความเร็วสูง
 function searchNetworkData() {
     const targetNetId = document.getElementById('network-input').value.trim();
     if (!targetNetId) return alert('กรุณาระบุรหัสโครงข่ายก่อนค้นหา');
@@ -18,24 +18,27 @@ function searchNetworkData() {
     
     // ตรวจจับไฟล์โมดูลข้อมูลหลักจากฝั่ง Python
     if (typeof window.sapData === 'undefined' || typeof window.weightData === 'undefined') {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red; padding:20px;">❌ ไม่พบฐานข้อมูลในไฟล์ js/data.js กรุณาเช็กการรันบอทใน GitHub</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red; padding:20px;">❌ ไม่พบฐานข้อมูล กรุณากด Ctrl+F5 เพื่อล้างแคช หรือเช็กบอทใน GitHub</td></tr>`;
         document.getElementById('result-card').classList.remove('hidden');
         return;
     }
 
-    // กรองรหัสโครงข่ายตรงตัวในมิลลิวินาที
-    currentViewData = window.sapData.filter(item => String(item.network).trim() === targetNetId);
+    // 🟢 กรองรหัสโครงข่าย (ดักจับจุดทศนิยม .0 ที่อาจแฝงมาจาก SAP เพื่อความแม่นยำ)
+    const cleanTarget = targetNetId.replace(/\.0$/, '');
+    currentViewData = window.sapData.filter(item => {
+        const net = String(item.network).trim().replace(/\.0$/, '');
+        return net === cleanTarget;
+    });
+    
     selectedRows.clear();
     renderResultTable();
 }
 
-// ประมวลผลและกระจายข้อมูลลงสู่ตารางฟอร์มคำนวณและกล่องการ์ดเปอร์เซ็นต์
 function renderResultTable() {
     const tbody = document.getElementById('result-tbody');
     tbody.innerHTML = '';
     let grandTotal = 0;
 
-    // Reset Checkbox 'เลือกทั้งหมด' ทุกครั้งที่โหลดตารางใหม่
     const selectAllCb = document.getElementById('select-all-checkbox');
     if (selectAllCb) selectAllCb.checked = false;
     updateDeleteButtonState();
@@ -50,8 +53,10 @@ function renderResultTable() {
         const localWeightInfo = window.weightData ? window.weightData[item.materialCode] : null;
         const weightInfo = localWeightInfo || { weight: 0.00, unit: 'กก.' };
         
-        // 🟢 แก้ไข: ใช้ตัวแปร reqQty (ปริมาณความต้องการ) ในการคูณน้ำหนัก
-        const totalRowWeight = item.reqQty * weightInfo.weight;
+        // 🟢 ระบบดักจับกันแครช: ดึงปริมาณความต้องการเป็นหลัก ถ้าเบราว์เซอร์จำแคชเก่าให้ดึงปริมาณต่างมาแทน
+        const qty = item.reqQty !== undefined ? item.reqQty : (item.diffQty || 0);
+        
+        const totalRowWeight = qty * weightInfo.weight;
         grandTotal += totalRowWeight;
 
         const isChecked = selectedRows.has(index) ? 'checked' : '';
@@ -65,7 +70,8 @@ function renderResultTable() {
                 <td style="color:#555;">${item.wbs}</td>
                 <td style="font-weight:600; color:#111;">${item.materialCode}</td>
                 <td style="color:#000; font-weight:500;">${item.description}</td>
-                <td class="num bold">${item.reqQty.toLocaleString()}</td> <td class="num" style="color:#666;">${weightInfo.weight.toFixed(3)}</td>
+                <td class="num bold">${qty.toLocaleString()}</td>
+                <td class="num" style="color:#666;">${weightInfo.weight.toFixed(3)}</td>
                 <td style="text-align:center; color:#666;">${weightInfo.unit}</td>
                 <td class="num bold" style="color:#0284c7;">${totalRowWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             </tr>
@@ -77,7 +83,7 @@ function renderResultTable() {
     document.getElementById('result-card').classList.remove('hidden');
 }
 
-// คำนวณเปอร์เซ็นต์น้ำหนักเป้าหมายและสะท้อนผลขึ้นหน้าจอ
+// คำนวณเปอร์เซ็นต์น้ำหนักเป้าหมาย
 function updateMetrics(totalWeight) {
     const w100 = totalWeight;
     const w90 = totalWeight * 0.9;
@@ -88,7 +94,6 @@ function updateMetrics(totalWeight) {
     document.getElementById('weight-80').innerText = w80.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 }
 
-// จัดการการติ๊กเลือก Checkbox รายแถว
 function toggleRowSelection(cb) {
     const index = parseInt(cb.getAttribute('data-index'));
     if (cb.checked) {
@@ -101,7 +106,6 @@ function toggleRowSelection(cb) {
     updateDeleteButtonState();
 }
 
-// จัดการการติ๊กเลือก Checkbox ทั้งหมดในตาราง
 function toggleSelectAll(cb) {
     const rowCheckboxes = document.querySelectorAll('.row-checkbox');
     if (cb.checked) {
@@ -118,7 +122,6 @@ function toggleSelectAll(cb) {
     updateDeleteButtonState();
 }
 
-// อัปเดตสถานะปุ่มลบ (เปิด/ปิด ใช้งานและแสดงจำนวน)
 function updateDeleteButtonState() {
     const btn = document.getElementById('delete-selected-btn');
     if (!btn) return;
@@ -128,7 +131,6 @@ function updateDeleteButtonState() {
         : '🗑️ ลบรายการที่เลือก';
 }
 
-// ลบทุกแถวที่ถูกติ๊กเลือกไว้พร้อมกันในครั้งเดียว หลังยืนยันหนึ่งครั้ง
 function deleteSelectedRows() {
     if (selectedRows.size === 0) return;
     if (!confirm(`คุณต้องการลบ ${selectedRows.size} รายการที่เลือกออกจากรายงานนี้ใช่หรือไม่?`)) return;
@@ -138,7 +140,6 @@ function deleteSelectedRows() {
     renderResultTable();
 }
 
-// โหลดข้อมูลตารางพัสดุและน้ำหนักทั้งหมดมาแสดงในหน้าตารางข้อมูลเพื่อตรวจสอบสิทธิ์
 function loadWeightTable() {
     const tbody = document.getElementById('weight-list-tbody');
     if (typeof window.weightData === 'undefined') {
