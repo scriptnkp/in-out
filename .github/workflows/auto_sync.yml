@@ -1,51 +1,33 @@
-import requests
-import os
+name: Generate Dashboard Data
+on:
+  push:
+    branches: [ main ] 
+  workflow_dispatch:
 
-# ลิงก์ API ของคุณ
-API_URL = "https://script.google.com/macros/s/AKfycbxF6cy4_Xd2I30ePPqQFF3qeYPn77CldMsewIzePotdsXsEvwdzX1QdWXPeiucfaVNU9Q/exec"
+permissions:
+  contents: write
 
-def process_sap_text(filepath):
-    data = []
-    if not os.path.exists(filepath):
-        print(f"ไม่พบไฟล์ {filepath}")
-        return data
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: pip install pandas openpyxl
         
-    with open(filepath, 'r', encoding='utf-8') as f:
-        for line in f:
-            line = line.strip()
-            # ตรวจสอบบรรทัดข้อมูลจริงที่ขึ้นต้นด้วย | และไม่ใช่เส้นแบ่งตารางหรือหัวข้อ
-            if line.startswith('|') and not line.startswith('|-') and 'วัสดุ' not in line and 'การแสดงรายการ' not in line:
-                # แยกคอลัมน์ด้วยเครื่องหมาย | และลบช่องว่างส่วนเกินออก
-                cols = [col.strip() for col in line.split('|')[1:-1]]
-                
-                # ถ้าคอลัมน์มีครบตามโครงสร้าง SAP (อย่างน้อย 11 คอลัมน์)
-                if len(cols) >= 11:
-                    data.append([
-                        cols[0],  # MaterialCode (วัสดุ)
-                        cols[1],  # Description (คำอธิบายวัสดุ)
-                        cols[2],  # Plant (Plnt)
-                        cols[3],  # OrderNo (ใบสั่ง)
-                        cols[4],  # Network (โครงข่าย) -> จุดสำคัญ!
-                        cols[5],  # WBS (องค์ประกอบ WBS)
-                        cols[6],  # MvT
-                        cols[7],  # ReqQty (ปม.ต้องการ)
-                        cols[8],  # RemovedQty
-                        cols[9],  # DiffQty (ปริมาณต่าง)
-                        cols[10]  # ReqDate (วันต้องการ)
-                    ])
-    return data
-
-if __name__ == "__main__":
-    filepath = "11.zmb25.txt"
-    print("⏳ กำลังแปลงไฟล์ SAP...")
-    data = process_sap_text(filepath)
-    
-    if data:
-        print(f"✅ คลีนข้อมูลได้ {len(data)} แถว กำลังอัปโหลด...")
-        try:
-            res = requests.post(API_URL, json={"action": "sync_raw_data", "data": data}, timeout=30)
-            print("🚀 ผลลัพธ์จาก Google API:", res.text)
-        except Exception as e:
-            print("❌ เชื่อมต่อ Google ล้มเหลว:", str(e))
-    else:
-        print("⚠️ ไม่พบแถวข้อมูลที่สามารถนำไปใช้งานได้ในไฟล์")
+      - name: Run script
+        run: python run.py
+        
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add js/data.js
+          git commit -m "Auto-update js/data.js" -a || exit 0
+          git push
