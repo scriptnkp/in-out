@@ -32,7 +32,6 @@
             </div>
 
             <div id="result-card" class="hidden">
-                
                 <div class="metrics-grid">
                     <div class="metric-card card-100">
                         <span class="metric-title">น้ำหนักสุทธิรวม (100%)</span>
@@ -51,31 +50,34 @@
                 <div class="sheet-container">
                     <div class="report-header">
                         <div class="sheet-title">📄 รายการสรุปคำนวณปริมาณและน้ำหนักวัสดุอุปกรณ์</div>
-                        <button onclick="window.print()" class="btn-print">🖨️ พิมพ์รายงานมาตรฐาน</button>
+                        <div class="header-actions">
+                            <button id="delete-selected-btn" onclick="deleteSelectedRows()" class="btn-delete" disabled>🗑️ ลบรายการที่เลือก</button>
+                            <button onclick="window.print()" class="btn-print">🖨️ พิมพ์รายงานมาตรฐาน</button>
+                        </div>
                     </div>
                     
                     <div class="table-wrapper">
                         <table class="google-sheet-table">
                             <thead>
                                 <tr>
+                                    <th style="width: 40px; text-align: center;">
+                                        <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this)">
+                                    </th>
                                     <th style="width: 50px; text-align: center;">ลำดับ</th>
                                     <th style="width: 180px;">องค์ประกอบ WBS</th>
                                     <th style="width: 130px;">รหัสพัสดุ</th>
                                     <th>รายการอุปกรณ์พัสดุ</th>
-                                    <th class="num" style="width: 100px;">ปริมาณต่าง</th>
-                                    <th class="num" style="width: 110px;">นน./หน่วย</th>
+                                    <th class="num" style="width: 100px;">ปริมาณความต้องการ</th> <th class="num" style="width: 110px;">นน./หน่วย</th>
                                     <th style="width: 80px; text-align: center;">หน่วย</th>
                                     <th class="num" style="width: 140px;">รวมน้ำหนัก (กก.)</th>
-                                    <th class="action-col" style="width: 80px; text-align: center;">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody id="result-tbody">
-                                </tbody>
+                            </tbody>
                             <tfoot>
                                 <tr class="total-row">
-                                    <td colspan="7" class="text-right bold">น้ำหนักสุทธิรวมทั้งสิ้น (กิโลกรัม):</td>
+                                    <td colspan="8" class="text-right bold">น้ำหนักสุทธิรวมทั้งสิ้น (กิโลกรัม):</td>
                                     <td id="grand-total-val" class="num bold">0.00</td>
-                                    <td class="action-col"></td>
                                 </tr>
                             </tfoot>
                         </table>
