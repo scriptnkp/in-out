@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timezone, timedelta
 
 def read_sap_file(filepath):
-    # ฟังก์ชันสลับรหัสภาษาเพื่อรองรับภาษาไทยจากระบบ SAP ทุกฟอร์แมต ป้องกันบอทแครช 100%
+    # รองรับการถอดรหัสภาษาไทยทุกฟอร์แมตจากระบบ SAP ป้องกันบอทแครช 100%
     encodings = ['utf-8', 'utf-8-sig', 'tis-620', 'cp874']
     for enc in encodings:
         try:
@@ -21,51 +21,74 @@ def parse_float(val):
         return 0.0
 
 def main():
-    input_file = "11.zmb25.txt"
+    file_zmb25 = "11.zmb25.txt"
+    file_weight = "น้ำหนัก.txt"
     output_file = os.path.join("js", "data.js")
     
-    if not os.path.exists(input_file):
-        print(f"❌ Error: ไม่พบไฟล์ {input_file} ในระบบ")
+    # ตรวจสอบความพร้อมของไฟล์ทั้ง 2 ตัว
+    if not os.path.exists(file_zmb25):
+        print(f"❌ Error: ไม่พบไฟล์โครงข่าย {file_zmb25}")
+        return
+    if not os.path.exists(file_weight):
+        print(f"❌ Error: ไม่พบไฟล์ตารางน้ำหนัก {file_weight}")
         return
 
-    print(f"⏳ เริ่มอ่านและล้างข้อมูลไฟล์ {input_file} (ไฟล์เดียวเน้นๆ)...")
-    content = read_sap_file(input_file)
+    print(f"⏳ เริ่มกระมวลผลควบคู่ 2 ไฟล์: {file_zmb25} และ {file_weight}...")
     
-    clean_data = []
-    lines = content.splitlines()
-    
-    for line in lines:
+    # 1. จัดการสกัดข้อมูลไฟล์โครงข่าย (11.zmb25.txt)
+    content_zmb = read_sap_file(file_zmb25)
+    clean_sap = []
+    for line in content_zmb.splitlines():
         line = line.strip()
-        # คัดกรองเอาเฉพาะบรรทัดที่เป็นแถวข้อมูลจริงจากตาราง SAP
         if line.startswith('|') and not line.startswith('|-') and 'วัสดุ' not in line and 'การแสดงรายการ' not in line:
             columns = [col.strip() for col in line.split('|')[1:-1]]
-            
             if len(columns) >= 11:
-                clean_data.append({
-                    "materialCode": columns[0],      # รหัสวัสดุ
-                    "description": columns[1],       # คำอธิบายวัสดุ (รายชื่ออุปกรณ์)
+                clean_sap.append({
+                    "materialCode": columns[0],      # รหัสพัสดุวัสดุ
+                    "description": columns[1],       # ชื่ออุปกรณ์
                     "network": columns[4],           # รหัสโครงข่าย
                     "wbs": columns[5],               # องค์ประกอบ WBS
-                    "diffQty": parse_float(columns[9]) # ปริมาณต่าง (รองรับคอมมาและค่าติดลบ)
+                    "diffQty": parse_float(columns[9]) # ปริมาณผลต่าง
                 })
 
-    # บันทึกเวลาที่อัปเดตระบบล่าสุดในโซนเวลาประเทศไทย
+    # 2. จัดการสกัดข้อมูลไฟล์น้ำหนักอุปกรณ์ (น้ำหนัก.txt)
+    content_weight = read_sap_file(file_weight)
+    clean_weights = {}
+    for line in content_weight.splitlines():
+        line = line.strip()
+        if '|' in line and 'รหัสพัสดุ' not in line:
+            parts = [p.strip() for p in line.split('|')]
+            if len(parts) >= 3:
+                mat_code = parts[0]
+                desc = parts[1].replace('"', '').strip() # ลบเครื่องหมายคำพูดขยะ
+                weight_val = parse_float(parts[2])
+                unit_val = parts[3] if len(parts) > 3 else "กก."
+                
+                # บันทึกลงพจนานุกรม HashMap เพื่อให้หน้าบ้านดึงไปเรียกใช้ด้วยรหัสพัสดุได้ทันที
+                clean_weights[mat_code] = {
+                    "weight": weight_val,
+                    "unit": unit_val,
+                    "description": desc
+                }
+
+    # บันทึกเวลาอัปเดตข้อมูลล่าสุดของระบบ (โซนเวลาประเทศไทย)
     tz_th = timezone(timedelta(hours=7))
     update_time = datetime.now(tz_th).strftime("%d/%m/%Y เวลา %H:%M น.")
 
-    # ตรวจสอบและสร้างโฟลเดอร์ js/ ล่วงหน้าก่อนเขียนไฟล์
+    # ตรวจสอบและสร้างโฟลเดอร์ js/
     os.makedirs("js", exist_ok=True)
     
-    # แพ็กข้อมูลส่งเข้าสู่ Global Window Object เพื่อความเสถียรสูงสุดของเบราว์เซอร์
+    # รวมฐานข้อมูลทั้ง 2 ชุดฉีดเข้าสู่ระบบ Global Window ของบราวเซอร์
     js_content = f"""// ไฟล์นี้ถูกสร้างอัตโนมัติจาก Python (ห้ามแก้ไขด้วยมือ)
 window.lastUpdated = "{update_time}";
-window.sapData = {json.dumps(clean_data, ensure_ascii=False)};
+window.sapData = {json.dumps(clean_sap, ensure_ascii=False)};
+window.weightData = {json.dumps(clean_weights, ensure_ascii=False)};
 """
 
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(js_content)
         
-    print(f"🎉 สำเร็จ! สร้างไฟล์ {output_file} เรียบร้อยแล้ว (พบข้อมูลโครงข่ายรวม {len(clean_data)} แถว)")
+    print(f"🎉 สำเร็จลุล่วง! บอทสร้างไฟล์ความเร็วสูงไว้ที่ {output_file} เรียบร้อยแล้ว")
 
 if __name__ == "__main__":
     main()
