@@ -19,11 +19,12 @@
     </nav>
 
     <main class="container">
+        <!-- หน้าตรวจสอบโครงข่าย -->
         <section id="search-tab" class="tab-content active">
             <div class="card search-card">
                 <h3>ค้นหาข้อมูลวัสดุรายโครงข่าย</h3>
                 <div class="search-form">
-                    <input type="text" id="network-input" placeholder="ป้อนรหัสโครงข่าย เช่น 8005321538 หรือ 6000980432">
+                    <input type="text" id="network-input" placeholder="ป้อนรหัสโครงข่าย เช่น 8005275973">
                     <button onclick="searchNetworkData()" class="btn-main">ค้นหาและคำนวณ</button>
                 </div>
             </div>
@@ -61,6 +62,7 @@
             </div>
         </section>
 
+        <!-- หน้าตั้งค่าน้ำหนัก -->
         <section id="settings-tab" class="tab-content">
             <div class="card">
                 <h3>🔧 ตั้งค่าและอัปเดตน้ำหนักอุปกรณ์ (Google Sheets DB)</h3>
@@ -88,7 +90,8 @@
         </section>
     </main>
 
-    <script src="data.js"></script>
+    <!-- ⚠️ ลำดับการโหลดสคริปต์พาธโฟลเดอร์ js/ เพื่อความเสถียรของหน้าเว็บ -->
+    <script src="js/data.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
