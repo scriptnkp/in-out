@@ -3,7 +3,6 @@ import json
 from datetime import datetime, timezone, timedelta
 
 def read_sap_file(filepath):
-    # รองรับการถอดรหัสภาษาไทยทุกฟอร์แมตจากระบบ SAP ป้องกันบอทแครช 100%
     encodings = ['utf-8', 'utf-8-sig', 'tis-620', 'cp874']
     for enc in encodings:
         try:
@@ -25,7 +24,6 @@ def main():
     file_weight = "น้ำหนัก.txt"
     output_file = os.path.join("js", "data.js")
     
-    # ตรวจสอบความพร้อมของไฟล์ทั้ง 2 ตัว
     if not os.path.exists(file_zmb25):
         print(f"❌ Error: ไม่พบไฟล์โครงข่าย {file_zmb25}")
         return
@@ -35,7 +33,6 @@ def main():
 
     print(f"⏳ เริ่มกระมวลผลควบคู่ 2 ไฟล์: {file_zmb25} และ {file_weight}...")
     
-    # 1. จัดการสกัดข้อมูลไฟล์โครงข่าย (11.zmb25.txt)
     content_zmb = read_sap_file(file_zmb25)
     clean_sap = []
     for line in content_zmb.splitlines():
@@ -44,14 +41,13 @@ def main():
             columns = [col.strip() for col in line.split('|')[1:-1]]
             if len(columns) >= 11:
                 clean_sap.append({
-                    "materialCode": columns[0],      # รหัสพัสดุวัสดุ
-                    "description": columns[1],       # ชื่ออุปกรณ์
-                    "network": columns[4],           # รหัสโครงข่าย
-                    "wbs": columns[5],               # องค์ประกอบ WBS
-                    "diffQty": parse_float(columns[9]) # ปริมาณผลต่าง
+                    "materialCode": columns[0],      
+                    "description": columns[1],       
+                    "network": columns[4],           
+                    "wbs": columns[5],               
+                    "reqQty": parse_float(columns[7]) # 🟢 แก้ไข: ดึงคอลัมน์ที่ 8 'ปม.ต้องการ' และเปลี่ยนชื่อตัวแปรเป็น reqQty
                 })
 
-    # 2. จัดการสกัดข้อมูลไฟล์น้ำหนักอุปกรณ์ (น้ำหนัก.txt)
     content_weight = read_sap_file(file_weight)
     clean_weights = {}
     for line in content_weight.splitlines():
@@ -60,25 +56,21 @@ def main():
             parts = [p.strip() for p in line.split('|')]
             if len(parts) >= 3:
                 mat_code = parts[0]
-                desc = parts[1].replace('"', '').strip() # ลบเครื่องหมายคำพูดขยะ
+                desc = parts[1].replace('"', '').strip() 
                 weight_val = parse_float(parts[2])
                 unit_val = parts[3] if len(parts) > 3 else "กก."
                 
-                # บันทึกลงพจนานุกรม HashMap เพื่อให้หน้าบ้านดึงไปเรียกใช้ด้วยรหัสพัสดุได้ทันที
                 clean_weights[mat_code] = {
                     "weight": weight_val,
                     "unit": unit_val,
                     "description": desc
                 }
 
-    # บันทึกเวลาอัปเดตข้อมูลล่าสุดของระบบ (โซนเวลาประเทศไทย)
     tz_th = timezone(timedelta(hours=7))
     update_time = datetime.now(tz_th).strftime("%d/%m/%Y เวลา %H:%M น.")
 
-    # ตรวจสอบและสร้างโฟลเดอร์ js/
     os.makedirs("js", exist_ok=True)
     
-    # รวมฐานข้อมูลทั้ง 2 ชุดฉีดเข้าสู่ระบบ Global Window ของบราวเซอร์
     js_content = f"""// ไฟล์นี้ถูกสร้างอัตโนมัติจาก Python (ห้ามแก้ไขด้วยมือ)
 window.lastUpdated = "{update_time}";
 window.sapData = {json.dumps(clean_sap, ensure_ascii=False)};
