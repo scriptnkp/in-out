@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคำนวณวัสดุโครงข่าย</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar"><h2>Network Material Estimator</h2></nav>
+    <main class="container">
+        <div class="card">
+            <h3>ค้นหาด้วยรหัสโครงข่าย</h3>
+            <div class="search-box">
+                <input type="text" id="network-input" placeholder="กรอกรหัสโครงข่าย เช่น 8005321538">
+                <button onclick="fetchNetworkData()">ค้นหา</button>
+            </div>
+        </div>
+
+        <div id="result-card" class="card hidden">
+            <button onclick="window.print()" class="btn-print">พิมพ์รายงาน</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>WBS</th><th>รหัสวัสดุ</th><th>คำอธิบาย</th>
+                        <th>ปริมาณต่าง</th><th>นน.ต่อหน่วย</th><th>หน่วย</th><th>นน.รวม (กก.)</th>
+                        <th class="action-col">ลบ</th>
+                    </tr>
+                </thead>
+                <tbody id="materials-tbody"></tbody>
+                <tfoot>
+                    <tr><td colspan="6" style="text-align:right">รวมสุทธิ:</td><td id="grand-total-weight">0.00</td><td class="action-col"></td></tr>
+                </tfoot>
+            </table>
+        </div>
+    </main>
+    <script src="js/app.js"></script>
+</body>
+</html>
