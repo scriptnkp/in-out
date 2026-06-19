@@ -1,7 +1,7 @@
-// ดึงลิงก์ API เดิมของคุณมาทำงานร่วมกับตาราง Weights
+// js/app.js
 const API_URL = "https://script.google.com/macros/s/AKfycbxF6cy4_Xd2I30ePPqQFF3qeYPn77CldMsewIzePotdsXsEvwdzX1QdWXPeiucfaVNU9Q/exec";
-let filteredData = [];
-let globalWeights = {};
+let currentViewData = [];
+let cloudWeightsMap = {};
 
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -10,85 +10,100 @@ function switchTab(tabId) {
     event.currentTarget.classList.add('active');
 }
 
-// ค้นหาและคำนวณแบบ Client-side Real-time ลื่นปรื๊ดระดับมิลลิวินาที
-async function searchNetwork() {
-    const netId = document.getElementById('network-input').value.trim();
-    if (!netId) return alert('กรุณากรอกรหัสโครงข่าย');
+// เจาะค้นหาโครงข่ายจากตัวแปร wbsDataByWbs ของสคริปต์ Python
+async function searchNetworkData() {
+    const targetNetId = document.getElementById('network-input').value.trim();
+    if (!targetNetId) return alert('กรุณาระบุรหัสโครงข่ายก่อนค้นหา');
 
     const tbody = document.getElementById('result-tbody');
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">⏳ กำลังจับคู่น้ำหนักพัสดุจากคลาวด์ฐานข้อมูล...</td></tr>`;
-    document.getElementById('report-section').classList.remove('hidden');
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">⏳ กำลังโหลดตารางน้ำหนักอุปกรณ์จากคลาวด์...</td></tr>`;
+    document.getElementById('result-card').classList.remove('hidden');
 
     try {
-        // 1. ดึงข้อมูลตารางน้ำหนักล่าสุดจาก Google Sheets มาอมไว้ก่อน
+        // 1. ดึงข้อมูลน้ำหนักปัจจุบันจาก Google Sheets มารอไว้
         const res = await fetch(`${API_URL}?action=get_all_weights`);
         const json = await res.json();
-        
-        globalWeights = {};
+        cloudWeightsMap = {};
         if (json.status === 'success') {
             json.data.forEach(w => {
-                globalWeights[w.materialCode] = { weight: w.weight, unit: w.unit };
+                cloudWeightsMap[w.materialCode] = { weight: w.weight, unit: w.unit };
             });
         }
 
-        // 2. กรองข้อมูลโครงข่ายจาก window.sapData ที่ดึงมาจาก GitHub โดยตรง
-        if (!window.sapData) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">❌ ไม่พบฐานข้อมูลดิบ กรุณาตรวจสอบการรันใน GitHub</td></tr>`;
+        // 2. ค้นหาและคัดกรองข้อมูลจากไฟล์ data.js (สแกนผ่าน wbsDataByWbs)
+        if (typeof wbsDataByWbs === 'undefined') {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">❌ ไม่พบตัวแปรฐานข้อมูลในไฟล์ data.js กรุณาเช็กบอท GitHub</td></tr>`;
             return;
         }
 
-        filteredData = window.sapData.filter(item => String(item.network).trim() === netId);
-        renderOutputTable();
+        currentViewData = [];
+        // วนลูปอ่านข้อมูลทุก WBS เพื่อแกะหาโครงข่าย (Network) ที่ตรงกัน
+        for (const wbsKey in wbsDataByWbs) {
+            const records = wbsDataByWbs[wbsKey];
+            records.forEach(item => {
+                if (String(item.Network).trim() === targetNetId) {
+                    currentViewData.push({
+                        wbs: item.WBS,
+                        materialCode: item['วัสดุ'],
+                        description: item.MatDesc,
+                        qty: parseFloat(item.Qty) || 0
+                    });
+                }
+            });
+        }
+
+        renderResultTable();
 
     } catch (e) {
-        alert('เกิดข้อผิดพลาดในการเชื่อมต่อระบบฐานข้อมูลคลาวด์');
+        alert('เกิดข้อผิดพลาดในการดึงข้อมูลจากหลังบ้าน');
         console.error(e);
     }
 }
 
-function renderOutputTable() {
+// วาดตารางข้อมูลและคำนวณผลรวมน้ำหนักสุทธิ
+function renderResultTable() {
     const tbody = document.getElementById('result-tbody');
     tbody.innerHTML = '';
-    let totalWeight = 0;
+    let grandTotal = 0;
 
-    if (filteredData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">❌ ไม่พบรายการวัสดุภายใต้รหัสโครงข่ายนี้</td></tr>`;
+    if (currentViewData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">❌ ไม่พบข้อมูลวัสดุและ WBS ภายใต้โครงข่ายนี้</td></tr>`;
         document.getElementById('grand-total-val').innerText = '0.00';
         return;
     }
 
-    filteredData.forEach((item, index) => {
-        // วิ่งไปจับคู่น้ำหนักจากแผ่นงาน Weights ใน Google Sheets ที่โหลดมา
-        const weightInfo = globalWeights[item.materialCode] || { weight: 0, unit: 'กก.' };
-        const rowWeight = item.diffQty * weightInfo.weight;
-        totalWeight += rowWeight;
+    currentViewData.forEach((item, index) => {
+        // ผูกชนข้อมูลพัสดุเข้ากับคลาวด์น้ำหนัก
+        const weightInfo = cloudWeightsMap[item.materialCode] || { weight: 0.00, unit: 'หน่วย' };
+        const totalRowWeight = item.qty * weightInfo.weight;
+        grandTotal += totalRowWeight;
 
         tbody.innerHTML += `
             <tr>
                 <td>${item.wbs}</td>
                 <td style="font-weight:600;">${item.materialCode}</td>
                 <td>${item.description}</td>
-                <td class="num">${item.diffQty.toLocaleString()}</td>
+                <td class="num">${item.qty.toLocaleString()}</td>
                 <td class="num">${weightInfo.weight.toFixed(3)}</td>
                 <td>${weightInfo.unit}</td>
-                <td class="num bold">${rowWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td class="num bold">${totalRowWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 <td class="action-col" style="text-align:center;">
-                    <button onclick="deleteRow(${index})" style="background:#ef4444; color:white; padding:3px 8px; font-size:13px; border-radius:4px;">ลบ</button>
+                    <button onclick="removeItem(${index})" style="background:#dc2626; color:white; padding:3px 8px; border:none; border-radius:4px; cursor:pointer;">ลบ</button>
                 </td>
             </tr>
         `;
     });
 
-    document.getElementById('grand-total-val').innerText = totalWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('grand-total-val').innerText = grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 }
 
-// ลบรายการที่ไม่ต้องการทิ้งชั่วคราวก่อนกดพิมพ์รายงาน
-function deleteRow(idx) {
-    filteredData.splice(idx, 1);
-    renderOutputTable();
+// ลบรายการแถวที่ไม่ต้องการออกชั่วคราวก่อนกดพิมพ์รายงาน
+function removeItem(idx) {
+    currentViewData.splice(idx, 1);
+    renderResultTable();
 }
 
-// ฟังก์ชันหน้าตั้งค่าน้ำหนัก: ส่งค่าไปเซฟลง Google Sheets Database
+// บันทึกการอัปเดตน้ำหนักส่งกลับไปที่ Google Sheets
 async function saveWeight(e) {
     e.preventDefault();
     const materialCode = document.getElementById('form-code').value.trim();
@@ -102,18 +117,19 @@ async function saveWeight(e) {
         });
         const json = await res.json();
         if (json.status === 'success') {
-            alert('บันทึกข้อมูลน้ำหนักลง Google Sheets สำเร็จ!');
+            alert('บันทึกปรับปรุงน้ำหนักลง Google Sheets เรียบร้อย!');
             document.getElementById('weight-form').reset();
             loadWeightTable();
         }
     } catch (err) {
-        alert('บันทึกข้อมูลล้มเหลว');
+        alert('อัปเดตน้ำหนักล้มเหลว');
     }
 }
 
+// โหลดข้อมูลน้ำหนักทั้งหมดมาแสดงในตารางหน้า Settings
 async function loadWeightTable() {
     const tbody = document.getElementById('weight-list-tbody');
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">กำลังดึงรายการจาก Google Sheets...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">กำลังโหลดข้อมูลน้ำหนักพัสดุจากระบบคลาวด์...</td></tr>`;
     try {
         const res = await fetch(`${API_URL}?action=get_all_weights`);
         const json = await res.json();
@@ -125,12 +141,12 @@ async function loadWeightTable() {
                         <td>${w.materialCode}</td>
                         <td class="bold">${w.weight}</td>
                         <td>${w.unit}</td>
-                        <td><button onclick="pullToEdit('${w.materialCode}', ${w.weight}, '${w.unit}')" style="background:#e2e8f0; padding:4px 8px; font-size:12px;">แก้ไข</button></td>
+                        <td><button onclick="pullToEdit('${w.materialCode}', ${w.weight}, '${w.unit}')" style="background:#e2e8f0; border:none; padding:4px 8px; font-size:12px; cursor:pointer; border-radius:4px;">แก้ไข</button></td>
                     </tr>
                 `;
             });
         }
-    } catch (e) { tbody.innerHTML = `<tr><td colspan="4">โหลดข้อมูลล้มเหลว</td></tr>`; }
+    } catch (e) { tbody.innerHTML = `<tr><td colspan="4">โหลดล้มเหลว</td></tr>`; }
 }
 
 function pullToEdit(code, weight, unit) {
