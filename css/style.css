@@ -1,47 +1,75 @@
-/* css/style.css */
+/* ฟอนต์และการจัดโครงสร้างพื้นฐานสไตล์ Google ชีต */
 :root {
-    --main-color: #0284c7;
-    --border-color: #e2e8f0;
-    --text-dark: #1e293b;
-    --bg-light: #f8fafc;
+    --sheet-border: #cccccc;
+    --sheet-header-bg: #f3f3f3;
+    --sheet-text: #000000;
+    --blue-accent: #0b5ed7;
+    --card-bg: #ffffff;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-body { background: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; }
-.navbar { background: #0f172a; color: white; padding: 15px 0; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Sarabun', sans-serif; }
+body { background: #f0f3f6; color: var(--sheet-text); font-size: 14px; padding-bottom: 50px; }
+
+.navbar { background: #1e293b; color: white; padding: 12px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; }
-.brand { font-weight: bold; font-size: 1.2rem; }
-.tab-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 16px; cursor: pointer; font-size: 0.95rem; }
-.tab-btn.active, .tab-btn:hover { color: white; border-bottom: 2px solid var(--main-color); font-weight: bold; }
-.container { max-width: 1200px; margin: 30px auto; padding: 0 15px; }
-.card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid var(--border-color); }
-.search-form { display: flex; gap: 12px; margin-top: 15px; flex-wrap: wrap; }
-input { flex: 1; min-width: 200px; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; outline: none; }
-input:focus { border-color: var(--main-color); }
-button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem; }
-.btn-main { background: var(--main-color); color: white; }
+.brand { font-weight: 600; font-size: 1.1rem; }
+.tab-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 16px; cursor: pointer; font-size: 0.95rem; border-radius: 4px; transition: 0.2s; }
+.tab-btn.active, .tab-btn:hover { color: white; background: rgba(255,255,255,0.1); font-weight: 600; }
+
+.container { max-width: 1200px; margin: 25px auto; padding: 0 15px; }
+.card { background: var(--card-bg); padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #ddd; }
+.search-form { display: flex; gap: 12px; margin-top: 12px; }
+input { flex: 1; padding: 8px 12px; border: 1px solid #bcccda; border-radius: 4px; font-size: 0.95rem; outline: none; }
+input:focus { border-color: var(--blue-accent); box-shadow: 0 0 0 2px rgba(11,94,215,0.2); }
+
+button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.95rem; }
+.btn-main { background: var(--blue-accent); color: white; }
 .btn-print { background: #475569; color: white; }
-.btn-success { background: #16a34a; color: white; }
-.report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
-.table-wrapper { overflow-x: auto; width: 100%; }
-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95rem; }
-th, td { border-bottom: 1px solid var(--border-color); padding: 12px; text-align: left; }
-th { background: #f1f5f9; font-weight: 600; }
-.num { text-align: right; }
-.bold { font-weight: bold; }
-.text-blue { color: var(--main-color); }
-.hidden { display: none !important; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* 🏛️ 9. ระบบพิมพ์มาตรฐานราชการไทย (Thai Government Print CSS) */
+/* 🟢 ดีไซน์ตารางและฟอนต์รายการให้คมชัดเหมือน Google ชีต */
+.sheet-container { background: white; border: 1px solid var(--sheet-border); padding: 20px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.sheet-title { font-size: 1.1rem; font-weight: 600; color: #333; }
+
+.table-wrapper { overflow-x: auto; width: 100%; }
+.google-sheet-table { width: 100%; border-collapse: collapse; text-align: left; background: #fff; border: 1px solid var(--sheet-border); }
+.google-sheet-table th, .google-sheet-table td { border: 1px solid var(--sheet-border); padding: 8px 10px; font-size: 14px; vertical-align: middle; }
+.google-sheet-table th { background: var(--sheet-header-bg); font-weight: 600; color: #333333; text-align: left; }
+
+/* จุดเน้น: ฟอนต์และสีของรายการอุปกรณ์ตามความต้องการ */
+.google-sheet-table tbody tr:hover { background-color: #fafdff; }
+.num { text-align: right; }
+.bold { font-weight: 700; }
+.text-right { text-align: right; }
+.total-row { background: #eaedf1; font-weight: 700; }
+
+/* 🟢 ดีไซน์การ์ดสรุปค่าน้ำหนักเปอร์เซ็นต์ (Metrics Cards) */
+.metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+.metric-card { background: white; padding: 15px 20px; border-radius: 6px; border-left: 5px solid #ccc; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+.metric-title { font-size: 0.9rem; color: #64748b; font-weight: 600; display: block; margin-bottom: 5px; }
+.metric-value { font-size: 1.6rem; font-weight: 700; color: #0f172a; }
+.metric-value small { font-size: 0.9rem; color: #64748b; font-weight: 400; }
+
+.card-100 { border-left-color: #0284c7; background: #f0f9ff; }
+.card-90 { border-left-color: #16a34a; background: #f0fdf4; }
+.card-80 { border-left-color: #ea580c; background: #fff7ed; }
+
+.hidden { display: none !important; }
+
+/* 🏛️ ระบบจัดหน้ากระดาษ A4 มาตรฐานราชการไทยตอนกดสั่งพิมพ์ */
 @media print {
     @page { size: A4 portrait; margin: 1.5in 1in 1in 1.5in; }
     body { background: white; color: black; font-size: 12pt; }
-    .navbar, .search-card, #weight-form, .action-col, .btn-print, #settings-tab { display: none !important; }
+    .navbar, .search-card, .action-col, .btn-print, #settings-tab { display: none !important; }
     .container { max-width: 100%; margin: 0; padding: 0; }
-    .card { border: none; box-shadow: none; padding: 0; }
-    table { width: 100%; border: 1px solid black; }
-    th, td { border: 1px solid black; padding: 6px; }
-    th { background: #e2e8f0 !important; color: black; }
+    .sheet-container { border: none; padding: 0; box-shadow: none; }
+    .google-sheet-table { width: 100%; border: 1px solid black; }
+    .google-sheet-table th, .google-sheet-table td { border: 1px solid black; padding: 5px; font-size: 11pt; color: black; }
+    .google-sheet-table th { background: #f2f2f2 !important; }
+    .total-row { background: #e2e2e2 !important; }
+    .metrics-grid { grid-template-columns: repeat(3, 1fr); margin-bottom: 25px; gap: 10px; }
+    .metric-card { border: 1px solid #000; padding: 10px; background: white !important; }
     tr { page-break-inside: avoid; }
 }
