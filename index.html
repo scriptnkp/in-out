@@ -26,7 +26,7 @@
             <div class="card search-card">
                 <h3>🔍 ป้อนรหัสโครงข่ายพัสดุเพื่อจัดทำรายงาน</h3>
                 <div class="search-form">
-                    <input type="text" id="network-input" placeholder="กรอกรหัสโครงข่าย เช่น 8005321538 หรือ 6000980432">
+                    <input type="text" id="network-input" placeholder="กรอกรหัสโครงข่าย เช่น 8005321538" onkeypress="if(event.key === 'Enter') searchNetworkData()">
                     <button onclick="searchNetworkData()" class="btn-main">คำนวณรายงาน</button>
                 </div>
             </div>
@@ -67,7 +67,8 @@
                                     <th style="width: 180px;">องค์ประกอบ WBS</th>
                                     <th style="width: 130px;">รหัสพัสดุ</th>
                                     <th>รายการอุปกรณ์พัสดุ</th>
-                                    <th class="num" style="width: 100px;">ปริมาณความต้องการ</th> <th class="num" style="width: 110px;">นน./หน่วย</th>
+                                    <th class="num" style="width: 100px;">ปริมาณความต้องการ</th>
+                                    <th class="num" style="width: 110px;">นน./หน่วย</th>
                                     <th style="width: 80px; text-align: center;">หน่วย</th>
                                     <th class="num" style="width: 140px;">รวมน้ำหนัก (กก.)</th>
                                 </tr>
