@@ -45,7 +45,8 @@ def main():
                     "description": columns[1],       
                     "network": columns[4],           
                     "wbs": columns[5],               
-                    "reqQty": parse_float(columns[7]) # 🟢 แก้ไข: ดึงคอลัมน์ที่ 8 'ปม.ต้องการ' และเปลี่ยนชื่อตัวแปรเป็น reqQty
+                    "reqQty": parse_float(columns[7]), # 🟢 ปริมาณความต้องการ (ปม.ต้องการ)
+                    "diffQty": parse_float(columns[9]) # 🟢 เก็บปริมาณต่างไว้สำรองกันแครช
                 })
 
     content_weight = read_sap_file(file_weight)
