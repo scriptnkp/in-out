@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบคำนวณวัสดุโครงข่าย & น้ำหนักอุปกรณ์</title>
+    <title>ระบบคำนวณเศษเหล็กและเศษสายพัสดุ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
     <nav class="navbar">
         <div class="nav-container">
-            <span class="brand">📊 SAP Network Material Dashboard</span>
+            <span class="brand">📊 ระบบคำนวณเศษเหล็กและเศษสายจากระบบ SAP</span>
             <div class="nav-links">
                 <button class="tab-btn active" onclick="switchTab('search-tab')">ตรวจสอบโครงข่าย</button>
-                <button class="tab-btn" onclick="switchTab('settings-tab'); loadWeightTable();">ตั้งค่าน้ำหนักวัสดุ</button>
+                <button class="tab-btn" onclick="switchTab('settings-tab'); loadWeightTable();">ตารางน้ำหนักวัสดุ</button>
             </div>
         </div>
     </nav>
@@ -21,64 +24,77 @@
     <main class="container">
         <section id="search-tab" class="tab-content active">
             <div class="card search-card">
-                <h3>ค้นหาข้อมูลวัสดุรายโครงข่าย</h3>
+                <h3>🔍 ป้อนรหัสโครงข่ายพัสดุเพื่อจัดทำรายงาน</h3>
                 <div class="search-form">
-                    <input type="text" id="network-input" placeholder="ป้อนรหัสโครงข่าย เช่น 8005321538 หรือ 6000980432">
-                    <button onclick="searchNetworkData()" class="btn-main">ค้นหาและคำนวณ</button>
+                    <input type="text" id="network-input" placeholder="กรอกรหัสโครงข่าย เช่น 8005321538 หรือ 6000980432">
+                    <button onclick="searchNetworkData()" class="btn-main">คำนวณรายงาน</button>
                 </div>
             </div>
 
-            <div id="result-card" class="card hidden">
-                <div class="report-header">
-                    <h4>รายการอุปกรณ์พัสดุที่ค้นพบแยกตาม WBS</h4>
-                    <button onclick="window.print()" class="btn-print">พิมพ์รายงานมาตรฐานราชการ</button>
-                </div>
+            <div id="result-card" class="hidden">
                 
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>องค์ประกอบ WBS</th>
-                                <th>รหัสวัสดุ</th>
-                                <th>รายชื่ออุปกรณ์</th>
-                                <th class="num">ปริมาณต่าง</th>
-                                <th class="num">นน./หน่วย</th>
-                                <th>หน่วย</th>
-                                <th class="num">นน.รวม (กก.)</th>
-                                <th class="action-col" style="text-align:center;">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="result-tbody"></tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="6" style="text-align: right; font-weight: bold;">น้ำหนักสุทธิรวมทั้งสิ้น (กก.):</td>
-                                <td id="grand-total-val" class="num bold text-blue">0.00</td>
-                                <td class="action-col"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                <div class="metrics-grid">
+                    <div class="metric-card card-100">
+                        <span class="metric-title">น้ำหนักสุทธิรวม (100%)</span>
+                        <div class="metric-value"><span id="weight-100">0.00</span> <small>กก.</small></div>
+                    </div>
+                    <div class="metric-card card-90">
+                        <span class="metric-title">ปรับลดเป้าหมาย (90%)</span>
+                        <div class="metric-value"><span id="weight-90">0.00</span> <small>กก.</small></div>
+                    </div>
+                    <div class="metric-card card-80">
+                        <span class="metric-title">ปรับลดเป้าหมาย (80%)</span>
+                        <div class="metric-value"><span id="weight-80">0.00</span> <small>กก.</small></div>
+                    </div>
+                </div>
+
+                <div class="sheet-container">
+                    <div class="report-header">
+                        <div class="sheet-title">📄 รายการสรุปคำนวณปริมาณและน้ำหนักวัสดุอุปกรณ์</div>
+                        <button onclick="window.print()" class="btn-print">🖨️ พิมพ์รายงานมาตรฐาน</button>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <table class="google-sheet-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px; text-align: center;">ลำดับ</th>
+                                    <th style="width: 180px;">องค์ประกอบ WBS</th>
+                                    <th style="width: 130px;">รหัสพัสดุ</th>
+                                    <th>รายการอุปกรณ์พัสดุ</th>
+                                    <th class="num" style="width: 100px;">ปริมาณต่าง</th>
+                                    <th class="num" style="width: 110px;">นน./หน่วย</th>
+                                    <th style="width: 80px; text-align: center;">หน่วย</th>
+                                    <th class="num" style="width: 140px;">รวมน้ำหนัก (กก.)</th>
+                                    <th class="action-col" style="width: 80px; text-align: center;">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="result-tbody">
+                                </tbody>
+                            <tfoot>
+                                <tr class="total-row">
+                                    <td colspan="7" class="text-right bold">น้ำหนักสุทธิรวมทั้งสิ้น (กิโลกรัม):</td>
+                                    <td id="grand-total-val" class="num bold">0.00</td>
+                                    <td class="action-col"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
         </section>
 
         <section id="settings-tab" class="tab-content">
-            <div class="card">
-                <h3>🔧 ตั้งค่าและอัปเดตน้ำหนักอุปกรณ์ (Google Sheets DB)</h3>
-                <form id="weight-form" onsubmit="saveWeight(event)" class="search-form">
-                    <input type="text" id="form-code" placeholder="รหัสวัสดุ" required>
-                    <input type="number" id="form-weight" step="0.001" placeholder="น้ำหนัก (กก.)" required>
-                    <input type="text" id="form-unit" placeholder="หน่วยนับ (เช่น กก. หรือ เมตร/กก)" required>
-                    <button type="submit" class="btn-success">บันทึกข้อมูล</button>
-                </form>
-
-                <div class="table-wrapper" style="margin-top:20px;">
-                    <table>
+            <div class="sheet-container">
+                <h3>📋 รายการรหัสและน้ำหนักวัสดุตั้งต้น (อัปเดตตรงจากระบบไฟล์คลัง)</h3>
+                <div class="table-wrapper" style="margin-top:15px;">
+                    <table class="google-sheet-table">
                         <thead>
                             <tr>
-                                <th>รหัสวัสดุ</th>
-                                <th>น้ำหนักปัจจุบัน (กก.)</th>
-                                <th>หน่วยนับ</th>
-                                <th>เรียกแก้ไข</th>
+                                <th style="width: 150px;">รหัสวัสดุ</th>
+                                <th>คำอธิบายรายการพัสดุ</th>
+                                <th style="width: 150px;" class="num">น้ำหนักต่อหน่วย</th>
+                                <th style="width: 120px; text-align: center;">หน่วยนับ</th>
                             </tr>
                         </thead>
                         <tbody id="weight-list-tbody"></tbody>
