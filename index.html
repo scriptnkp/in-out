@@ -3,34 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบคำนวณวัสดุโครงข่ายแบบไฮบริดความเร็วสูง</title>
+    <title>ระบบคำนวณวัสดุโครงข่าย & น้ำหนักอุปกรณ์</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
     <nav class="navbar">
         <div class="nav-container">
-            <span class="brand">🚀 Network Material Expert</span>
+            <span class="brand">📊 SAP Network Material Dashboard</span>
             <div class="nav-links">
                 <button class="tab-btn active" onclick="switchTab('search-tab')">ตรวจสอบโครงข่าย</button>
-                <button class="tab-btn" onclick="switchTab('settings-tab'); loadWeightTable();">ตั้งค่าน้ำหนักคลาวด์</button>
+                <button class="tab-btn" onclick="switchTab('settings-tab'); loadWeightTable();">ตั้งค่าน้ำหนักวัสดุ</button>
             </div>
         </div>
     </nav>
 
     <main class="container">
         <section id="search-tab" class="tab-content active">
-            <div class="card">
-                <h3>ป้อนรหัสโครงข่ายพัสดุ</h3>
+            <div class="card search-card">
+                <h3>ค้นหาข้อมูลวัสดุรายโครงข่าย</h3>
                 <div class="search-form">
-                    <input type="text" id="network-input" placeholder="ตัวอย่างเช่น 8005321538 หรือ 6000980432">
-                    <button onclick="searchNetwork()" class="btn-main">ค้นหาด่วน</button>
+                    <input type="text" id="network-input" placeholder="ป้อนรหัสโครงข่าย เช่น 8005321538 หรือ 6000980432">
+                    <button onclick="searchNetworkData()" class="btn-main">ค้นหาและคำนวณ</button>
                 </div>
             </div>
 
-            <div id="report-section" class="card hidden">
+            <div id="result-card" class="card hidden">
                 <div class="report-header">
-                    <h4>รายการวัสดุอุปกรณ์และผลรวมน้ำหนักสุทธิ</h4>
+                    <h4>รายการอุปกรณ์พัสดุที่ค้นพบแยกตาม WBS</h4>
                     <button onclick="window.print()" class="btn-print">พิมพ์รายงานมาตรฐานราชการ</button>
                 </div>
                 
@@ -63,12 +63,12 @@
 
         <section id="settings-tab" class="tab-content">
             <div class="card">
-                <h3>🔧 อัปเดตตารางน้ำหนักอุปกรณ์</h3>
+                <h3>🔧 ตั้งค่าและอัปเดตน้ำหนักอุปกรณ์ (Google Sheets DB)</h3>
                 <form id="weight-form" onsubmit="saveWeight(event)" class="search-form">
-                    <input type="text" id="form-code" placeholder="รหัสพัสดุ" required>
-                    <input type="number" id="form-weight" step="0.001" placeholder="น้ำหนักต่อหน่วย" required>
-                    <input type="text" id="form-unit" placeholder="หน่วย (เช่น กก. หรือ เมตร/กก)" required>
-                    <button type="submit" class="btn-success">บันทึกลง Google Sheets</button>
+                    <input type="text" id="form-code" placeholder="รหัสวัสดุ" required>
+                    <input type="number" id="form-weight" step="0.001" placeholder="น้ำหนัก (กก.)" required>
+                    <input type="text" id="form-unit" placeholder="หน่วยนับ (เช่น กก. หรือ เมตร/กก)" required>
+                    <button type="submit" class="btn-success">บันทึกข้อมูล</button>
                 </form>
 
                 <div class="table-wrapper" style="margin-top:20px;">
@@ -88,7 +88,7 @@
         </section>
     </main>
 
-    <script src="js/data.js"></script>
+    <script src="data.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
