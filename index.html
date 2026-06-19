@@ -3,37 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบคำนวณวัสดุโครงข่าย</title>
+    <title>ระบบคำนวณวัสดุโครงข่ายแบบไฮบริดความเร็วสูง</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <nav class="navbar"><h2>Network Material Estimator</h2></nav>
-    <main class="container">
-        <div class="card">
-            <h3>ค้นหาด้วยรหัสโครงข่าย</h3>
-            <div class="search-box">
-                <input type="text" id="network-input" placeholder="กรอกรหัสโครงข่าย เช่น 8005321538">
-                <button onclick="fetchNetworkData()">ค้นหา</button>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <span class="brand">🚀 Network Material Expert</span>
+            <div class="nav-links">
+                <button class="tab-btn active" onclick="switchTab('search-tab')">ตรวจสอบโครงข่าย</button>
+                <button class="tab-btn" onclick="switchTab('settings-tab'); loadWeightTable();">ตั้งค่าน้ำหนักคลาวด์</button>
             </div>
         </div>
+    </nav>
 
-        <div id="result-card" class="card hidden">
-            <button onclick="window.print()" class="btn-print">พิมพ์รายงาน</button>
-            <table>
-                <thead>
-                    <tr>
-                        <th>WBS</th><th>รหัสวัสดุ</th><th>คำอธิบาย</th>
-                        <th>ปริมาณต่าง</th><th>นน.ต่อหน่วย</th><th>หน่วย</th><th>นน.รวม (กก.)</th>
-                        <th class="action-col">ลบ</th>
-                    </tr>
-                </thead>
-                <tbody id="materials-tbody"></tbody>
-                <tfoot>
-                    <tr><td colspan="6" style="text-align:right">รวมสุทธิ:</td><td id="grand-total-weight">0.00</td><td class="action-col"></td></tr>
-                </tfoot>
-            </table>
-        </div>
+    <main class="container">
+        <section id="search-tab" class="tab-content active">
+            <div class="card">
+                <h3>ป้อนรหัสโครงข่ายพัสดุ</h3>
+                <div class="search-form">
+                    <input type="text" id="network-input" placeholder="ตัวอย่างเช่น 8005321538 หรือ 6000980432">
+                    <button onclick="searchNetwork()" class="btn-main">ค้นหาด่วน</button>
+                </div>
+            </div>
+
+            <div id="report-section" class="card hidden">
+                <div class="report-header">
+                    <h4>รายการวัสดุอุปกรณ์และผลรวมน้ำหนักสุทธิ</h4>
+                    <button onclick="window.print()" class="btn-print">พิมพ์รายงานมาตรฐานราชการ</button>
+                </div>
+                
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>องค์ประกอบ WBS</th>
+                                <th>รหัสวัสดุ</th>
+                                <th>รายชื่ออุปกรณ์</th>
+                                <th class="num">ปริมาณต่าง</th>
+                                <th class="num">นน./หน่วย</th>
+                                <th>หน่วย</th>
+                                <th class="num">นน.รวม (กก.)</th>
+                                <th class="action-col" style="text-align:center;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="result-tbody"></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="6" style="text-align: right; font-weight: bold;">น้ำหนักสุทธิรวมทั้งสิ้น (กก.):</td>
+                                <td id="grand-total-val" class="num bold text-blue">0.00</td>
+                                <td class="action-col"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="settings-tab" class="tab-content">
+            <div class="card">
+                <h3>🔧 อัปเดตตารางน้ำหนักอุปกรณ์</h3>
+                <form id="weight-form" onsubmit="saveWeight(event)" class="search-form">
+                    <input type="text" id="form-code" placeholder="รหัสพัสดุ" required>
+                    <input type="number" id="form-weight" step="0.001" placeholder="น้ำหนักต่อหน่วย" required>
+                    <input type="text" id="form-unit" placeholder="หน่วย (เช่น กก. หรือ เมตร/กก)" required>
+                    <button type="submit" class="btn-success">บันทึกลง Google Sheets</button>
+                </form>
+
+                <div class="table-wrapper" style="margin-top:20px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>รหัสวัสดุ</th>
+                                <th>น้ำหนักปัจจุบัน (กก.)</th>
+                                <th>หน่วยนับ</th>
+                                <th>เรียกแก้ไข</th>
+                            </tr>
+                        </thead>
+                        <tbody id="weight-list-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
     </main>
+
+    <script src="js/data.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
