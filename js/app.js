@@ -12,17 +12,17 @@ function switchTab(tabId) {
     }
 }
 
-// เจาะลึกสแกนหาโครงข่าย (Network) ภายในโครงสร้างข้อมูลซับซ้อนของตัวแปร wbsDataByWbs
+// ค้นหาและคำนวณแบบ Real-time รวดเร็วแม่นยำสูง
 async function searchNetworkData() {
     const targetNetId = document.getElementById('network-input').value.trim();
     if (!targetNetId) return alert('กรุณาระบุรหัสโครงข่ายก่อนค้นหา');
 
     const tbody = document.getElementById('result-tbody');
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">⏳ กำลังโหลดตารางน้ำหนักพัสดุจากคลาวด์ Google Sheets...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">⏳ กำลังเรียกตารางน้ำหนักพัสดุล่าสุดจาก Google Sheets...</td></tr>`;
     document.getElementById('result-card').classList.remove('hidden');
 
     try {
-        // 1. ดึงค่าตารางน้ำหนักล่าสุดมาเตรียมจับชนข้อมูล
+        // 1. ดึงข้อมูลตารางน้ำหนักพัสดุจากหน้าตาราง Weights ใน Google Sheets มาพักรอไว้
         const res = await fetch(`${API_URL}?action=get_all_weights`);
         const json = await res.json();
         cloudWeightsMap = {};
@@ -32,56 +32,38 @@ async function searchNetworkData() {
             });
         }
 
-        // 2. แกะข้อมูล WBS รายตัวเพื่อดึงรหัสโครงข่ายภายใน window.wbsDataByWbs (หรือ wbsDataByWbs) ที่มาจาก Python
-        const dataContainer = typeof wbsDataByWbs !== 'undefined' ? wbsDataByWbs : (window.wbsDataByWbs || null);
-        
-        if (!dataContainer) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">❌ ไม่พบโครงสร้างข้อมูลในไฟล์ data.js กรุณาเช็กการรันของบอท</td></tr>`;
+        // 2. ตรวจสอบและกรองข้อมูลโครงข่ายที่ส่งมาจาก window.sapData (ในไฟล์ js/data.js)
+        if (typeof window.sapData === 'undefined') {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">❌ ไม่พบตัวแปรฐานข้อมูลในไฟล์ data.js กรุณาตรวจสอบการรันของบอท</td></tr>`;
             return;
         }
 
-        currentViewData = [];
-        
-        // วนลูปสแกนอ่านคีย์ WBS ทุกก้อน เพื่อกรองหาเฉพาะรายการที่มีรหัสโครงข่ายตรงตามที่ป้อน
-        for (const wbsKey in dataContainer) {
-            const records = dataContainer[wbsKey];
-            if (Array.isArray(records)) {
-                records.forEach(item => {
-                    if (String(item.Network).trim() === targetNetId) {
-                        currentViewData.push({
-                            wbs: item.WBS,
-                            materialCode: item['วัสดุ'], // อ้างอิงตามชื่อฟิลด์ภาษาไทยจาก Pandas Dataframe ดั้งเดิม
-                            description: item.MatDesc,
-                            qty: parseFloat(item.Qty) || 0
-                        });
-                    }
-                });
-            }
-        }
-
+        // ใช้คำสั่งกรอง (Filter) ค้นหาข้อมูลรหัสโครงข่ายที่ป้อนอย่างตรงไปตรงมา
+        currentViewData = window.sapData.filter(item => String(item.network).trim() === targetNetId);
         renderResultTable();
 
     } catch (e) {
-        alert('ระบบดึงข้อมูลพัสดุขัดข้อง กรุณาตรวจสอบลิงก์สิทธิ์ของ Google Apps Script');
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">❌ เกิดข้อผิดพลาดในการเชื่อมต่อระบบฐานข้อมูลคลาวด์</td></tr>`;
         console.error(e);
     }
 }
 
-// ขับเคลื่อนผลลัพธ์ออกตารางพร้อมคำนวณน้ำหนักสุทธิสุทธิ
+// ขับเคลื่อนข้อมูลออกแสดงผลบนตารางพร้อมคำนวณผลรวมน้ำหนักสุทธิ
 function renderResultTable() {
     const tbody = document.getElementById('result-tbody');
     tbody.innerHTML = '';
     let grandTotal = 0;
 
     if (currentViewData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">❌ ไม่พบข้อมูลวัสดุพัสดุและองค์ประกอบ WBS สำหรับโครงข่ายนี้ในระบบข้อมูลดิบ</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:red;">❌ ไม่พบข้อมูลวัสดุอุปกรณ์พัสดุสำหรับรหัสโครงข่ายนี้</td></tr>`;
         document.getElementById('grand-total-val').innerText = '0.00';
         return;
     }
 
     currentViewData.forEach((item, index) => {
+        // วิ่งชนข้อมูลเพื่อจับคู่น้ำหนักวัสดุจาก Google Sheets
         const weightInfo = cloudWeightsMap[item.materialCode] || { weight: 0.00, unit: 'กก.' };
-        const totalRowWeight = item.qty * weightInfo.weight;
+        const totalRowWeight = item.diffQty * weightInfo.weight;
         grandTotal += totalRowWeight;
 
         tbody.innerHTML += `
@@ -89,7 +71,7 @@ function renderResultTable() {
                 <td>${item.wbs}</td>
                 <td style="font-weight:600;">${item.materialCode}</td>
                 <td>${item.description}</td>
-                <td class="num">${item.qty.toLocaleString()}</td>
+                <td class="num">${item.diffQty.toLocaleString()}</td>
                 <td class="num">${weightInfo.weight.toFixed(3)}</td>
                 <td>${weightInfo.unit}</td>
                 <td class="num bold">${totalRowWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -146,7 +128,7 @@ async function loadWeightTable() {
                         <td>${w.materialCode}</td>
                         <td class="bold">${w.weight}</td>
                         <td>${w.unit}</td>
-                        <td><button onclick="pullToEdit('${w.materialCode}', ${w.weight}, '${w.unit}')" style="background:#e2e8f0; border:none; padding:4px 8px; font-size:12px; cursor:pointer; border-radius:4px;">ดึงค่า</button></td>
+                        <td><button onclick="pullToEdit('${w.materialCode}', ${w.weight}, '${w.unit}')" style="background:#e2e8f0; border:none; padding:4px 8px; font-size:12px; cursor:pointer; border-radius:4px;">แก้ไข</button></td>
                     </tr>
                 `;
             });
