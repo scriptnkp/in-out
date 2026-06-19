@@ -1,19 +1,46 @@
-body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding: 0; }
-.navbar { background: #0284c7; color: white; padding: 1rem; text-align: center; }
-.container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
-.card { background: white; padding: 2rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.search-box { display: flex; gap: 10px; margin-top: 10px; }
-input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-button { padding: 10px 20px; background: #0284c7; color: white; border: none; border-radius: 4px; cursor: pointer; }
-.btn-print { background: #475569; margin-bottom: 10px; }
-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-th { background: #f8fafc; }
-.hidden { display: none; }
+:root {
+    --main-color: #0284c7;
+    --border-color: #e2e8f0;
+    --text-dark: #1e293b;
+    --bg-light: #f8fafc;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+body { background: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; }
+.navbar { background: #0f172a; color: white; padding: 15px 0; }
+.nav-container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; }
+.brand { font-weight: bold; font-size: 1.2rem; }
+.tab-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 16px; cursor: pointer; font-size: 0.95rem; }
+.tab-btn.active, .tab-btn:hover { color: white; border-bottom: 2px solid var(--main-color); }
+.container { max-width: 1100px; margin: 30px auto; padding: 0 15px; }
+.card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid var(--border-color); }
+.search-form { display: flex; gap: 12px; margin-top: 15px; flex-wrap: wrap; }
+input { flex: 1; min-width: 180px; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; outline: none; }
+input:focus { border-color: var(--main-color); }
+button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem; }
+.btn-main { background: var(--main-color); color: white; }
+.btn-print { background: #475569; color: white; }
+.btn-success { background: #16a34a; color: white; }
+.report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+.table-wrapper { overflow-x: auto; width: 100%; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95rem; }
+th, td { border-bottom: 1px solid var(--border-color); padding: 12px; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+.num { text-align: right; }
+.bold { font-weight: bold; }
+.text-blue { color: var(--main-color); }
+.hidden { display: none !important; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* 🏛️ ระบบพิมพ์มาตรฐานราชการไทย (Thai Government Print CSS) */
 @media print {
-    body { background: white; }
-    .card { box-shadow: none; border: none; }
-    .navbar, .search-box, .btn-print, .action-col { display: none; }
+    @page { size: A4 portrait; margin: 1.5in 1in 1in 1.5in; }
+    body { background: white; color: black; font-size: 12pt; }
+    .navbar, .card:first-of-type, #weight-form, .action-col, .btn-print, #settings-tab { display: none !important; }
+    .container { max-width: 100%; margin: 0; padding: 0; }
+    .card { border: none; box-shadow: none; padding: 0; }
     table { width: 100%; border: 1px solid black; }
-    th, td { border: 1px solid black; }
+    th, td { border: 1px solid black; padding: 6px; }
+    th { background: #e2e8f0 !important; }
+    tr { page-break-inside: avoid; }
 }
