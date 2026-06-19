@@ -1,0 +1,27 @@
+name: 🔄 Auto Sync SAP Data to Google Sheets
+
+on:
+  push:
+    paths:
+      - '11.zmb25.txt'  # รันอัตโนมัติเมื่อไฟล์นี้มีการเปลี่ยนแปลง
+  workflow_dispatch:    # อนุญาตให้กดปุ่มรันเองได้ (Manual Run)
+
+jobs:
+  process-and-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 ดึงข้อมูลโค้ดล่าสุด (Checkout)
+        uses: actions/checkout@v4
+
+      - name: 🐍 ติดตั้งสภาพแวดล้อม Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 📦 ติดตั้งไลบรารีที่จำเป็น (Requests)
+        run: pip install requests
+
+      - name: 🚀 รันสคริปต์ส่งข้อมูลเข้า Database
+        env:
+          GAS_API_URL: ${{ secrets.GAS_API_URL }}
+        run: python sync_to_gas.py
