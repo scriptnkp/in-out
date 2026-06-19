@@ -1,3 +1,4 @@
+/* css/style.css */
 :root {
     --main-color: #0284c7;
     --border-color: #e2e8f0;
@@ -7,14 +8,14 @@
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
 body { background: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; }
 .navbar { background: #0f172a; color: white; padding: 15px 0; }
-.nav-container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; }
+.nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; }
 .brand { font-weight: bold; font-size: 1.2rem; }
 .tab-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 16px; cursor: pointer; font-size: 0.95rem; }
-.tab-btn.active, .tab-btn:hover { color: white; border-bottom: 2px solid var(--main-color); }
-.container { max-width: 1100px; margin: 30px auto; padding: 0 15px; }
+.tab-btn.active, .tab-btn:hover { color: white; border-bottom: 2px solid var(--main-color); font-weight: bold; }
+.container { max-width: 1200px; margin: 30px auto; padding: 0 15px; }
 .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid var(--border-color); }
 .search-form { display: flex; gap: 12px; margin-top: 15px; flex-wrap: wrap; }
-input { flex: 1; min-width: 180px; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; outline: none; }
+input { flex: 1; min-width: 200px; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; outline: none; }
 input:focus { border-color: var(--main-color); }
 button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem; }
 .btn-main { background: var(--main-color); color: white; }
@@ -32,15 +33,15 @@ th { background: #f1f5f9; font-weight: 600; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* 🏛️ ระบบพิมพ์มาตรฐานราชการไทย (Thai Government Print CSS) */
+/* 🏛️ 9. ระบบพิมพ์มาตรฐานราชการไทย (Thai Government Print CSS) */
 @media print {
     @page { size: A4 portrait; margin: 1.5in 1in 1in 1.5in; }
     body { background: white; color: black; font-size: 12pt; }
-    .navbar, .card:first-of-type, #weight-form, .action-col, .btn-print, #settings-tab { display: none !important; }
+    .navbar, .search-card, #weight-form, .action-col, .btn-print, #settings-tab { display: none !important; }
     .container { max-width: 100%; margin: 0; padding: 0; }
     .card { border: none; box-shadow: none; padding: 0; }
     table { width: 100%; border: 1px solid black; }
     th, td { border: 1px solid black; padding: 6px; }
-    th { background: #e2e8f0 !important; }
+    th { background: #e2e8f0 !important; color: black; }
     tr { page-break-inside: avoid; }
 }
