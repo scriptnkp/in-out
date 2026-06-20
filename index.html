@@ -6,7 +6,7 @@
     <title>โปรแกรมคำนวณเศษเหล็กและเศษสายไฟฟ้า</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -22,41 +22,59 @@
     </nav>
 
     <main class="container">
+        <!-- แท็บหลัก: จัดทำรายงาน -->
         <section id="search-tab" class="tab-content active">
             <div class="card search-card no-print">
                 <h3>🔍 ป้อนรหัสโครงข่ายพัสดุเพื่อจัดทำรายงาน</h3>
                 <div class="search-form">
-                    <input type="text" id="network-input" placeholder="กรอกรหัสโครงข่าย เช่น 8005321538" onkeypress="if(event.key === 'Enter') searchNetworkData()">
+                    <input type="text" id="network-input" placeholder="กรอกรหัสโครงข่าย เช่น 8005275973" onkeypress="if(event.key === 'Enter') searchNetworkData()">
                     <button onclick="searchNetworkData()" class="btn-main">คำนวณรายงาน</button>
                 </div>
             </div>
 
+            <!-- 🟢 พื้นที่ฟอร์มรายงานที่ลอกแบบมา 100% -->
             <div id="result-card" class="hidden">
                 <div class="report-actions no-print" style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                    <button id="delete-selected-btn" onclick="deleteSelectedRows()" class="btn-delete" disabled>🗑️ ลบรายการที่ติ๊กเลือก</button>
+                    <button id="delete-selected-btn" onclick="deleteSelectedRows()" class="btn-delete" disabled>🗑️ ลบรายการที่เลือก</button>
                     <button onclick="window.print()" class="btn-print">🖨️ พิมพ์รายงาน</button>
                 </div>
 
                 <div class="sheet">
-                    <div class="title">โปรแกรมคำนวณเศษเหล็กและเศษสายไฟฟ้า</div>
-                    <div class="subtitle">(รายงานสรุปปริมาณและน้ำหนักวัสดุอุปกรณ์พัสดุ)</div>
+                    <div class="title">โปรแกรมคำนวณเศษเหล็กและเศษสายไฟฟ้า ตามมาตรฐาน</div>
+                    <div class="subtitle">บันทึกหลักเกณฑ์การคำนวณน้ำหนักเศษสายไฟฟ้าเพื่อลงบัญชีรับคืน เลขที่ สรก.(ล) 202/2567</div>
 
                     <div class="file-row">
-                        <div id="header-wbs-network"><b>องค์ประกอบ WBS:</b> - &nbsp;&nbsp;|&nbsp;&nbsp; <b>โครงข่าย:</b> -</div>
+                        <div><span class="label">ไฟล์ บันทึก</span></div>
+                        <div><span class="label">โปรแกรมตรวจสอบสาย</span></div>
                     </div>
 
-                    <div class="summary-grid">
-                        <div class="stat-box">
-                            <div class="label">น้ำหนักสุทธิรวม (100%)</div>
-                            <div class="val" id="weight-100">0.00</div>
+                    <!-- 🟢 WBS และโครงข่ายบรรทัดเดียวกัน -->
+                    <div class="meta">
+                        <div><div class="label">หมายเลขงาน (WBS)</div><div class="value" id="header-wbs">-</div></div>
+                        <div><div class="label">โครงข่าย</div><div class="value" id="header-network">-</div></div>
+                        <div><div class="label">เลขที่เอกสาร</div><div class="value">-</div></div>
+                    </div>
+
+                    <div class="thresh-heading">รวมทั้งหมด — เกณฑ์น้ำหนักลงบัญชีรับคืน (กก.)</div>
+                    <!-- กล่องแสดงค่าน้ำหนัก 100% 90% 80% ดีไซน์ตามฟอร์มตัวอย่าง -->
+                    <div class="thresholds">
+                        <div class="thresh-card p100">
+                            <span class="pct">100%</span>
+                            <div class="val" id="weight-100">-</div>
+                            <div class="unit">กก. (น้ำหนักรวม)</div>
+                            <div class="desc">ฐานคำนวณ — น้ำหนักรวมเต็มจากทุกรายการ</div>
                         </div>
-                        <div class="stat-box">
-                            <div class="label">เป้าหมายขั้นต่ำ (90%)</div>
-                            <div class="val" id="weight-90">0.00</div>
+                        <div class="thresh-card p90">
+                            <span class="pct">90%</span>
+                            <div class="val" id="weight-90">-</div>
+                            <div class="unit">กก. (ค่าเฉลี่ย)</div>
+                            <div class="desc">เกณฑ์ปกติของการลงบัญชีรับคืน</div>
                         </div>
-                        <div class="stat-box">
-                            <div class="label">ค่าเบี่ยงเบน (80%)</div>
-                            <div class="val" id="weight-80">0.00</div>
+                        <div class="thresh-card p80">
+                            <span class="pct">80%</span>
+                            <div class="val" id="weight-80">-</div>
+                            <div class="unit">กก. (ค่าเบี่ยงเบน)</div>
+                            <div class="desc">เท่ากับน้ำหนักต่ำสุดของผู้ผลิตสายไฟฟ้า</div>
                         </div>
                     </div>
 
@@ -68,38 +86,52 @@
                                         <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this)">
                                     </th>
                                     <th style="width: 50px; text-align: center;">ลำดับ</th>
-                                    <th style="width: 120px; text-align: center;">รหัสพัสดุ</th>
-                                    <th style="width: auto;">ชื่อวัสดุอุปกรณ์</th>
-                                    <th class="num" style="width: 80px;">จำนวน</th>
-                                    <th class="num" style="width: 90px;">นน./หน่วย</th>
-                                    <th class="num" style="width: 110px;">น้ำหนักรวม</th>
+                                    <th style="width: 120px;">รหัสพัสดุ</th>
+                                    <th style="width: auto;">รายการ</th>
+                                    <th class="num" style="width: 90px;">จำนวน/ชิ้น/อัน</th>
+                                    <th class="num" style="width: 90px;">กก./ชุด</th>
+                                    <th class="num" style="width: 100px;">น้ำหนัก(kg)</th>
                                     <th style="width: 60px; text-align: center;">หน่วย</th>
                                     <th class="no-print action-col" style="width: 60px; text-align: center;">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody id="result-tbody"></tbody>
                             <tfoot>
-                                <tr class="total-row">
-                                    <td colspan="4" class="text-right bold">น้ำหนักสุทธิรวมทั้งสิ้น (กิโลกรัม):</td>
-                                    <td id="grand-total-val" class="num bold" style="font-size: 16px;">0.00</td>
+                                <tr>
+                                    <td colspan="4" class="text-right bold total-label">รวมทั้งหมด</td>
+                                    <td id="grand-total-val" class="num bold total-val" colspan="2">0.00</td>
+                                    <td class="bold total-val">กก.</td>
                                     <td colspan="2" class="no-print"></td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
 
-                    <div class="check-section no-print">
-                        <h4 style="margin-bottom: 10px;">⚖️ ตรวจสอบเทียบน้ำหนักจริง</h4>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <input type="number" id="actualWeight" placeholder="กรอกน้ำหนักที่ชั่งได้จริง (กก.)" style="width: 250px;">
-                            <button onclick="runCheck()" class="btn-main">ตรวจสอบสถานะ</button>
+                    <!-- 🟢 ระบบตรวจสอบน้ำหนักจริงตามตัวอย่าง -->
+                    <div class="check-box no-print">
+                        <div class="check-row">
+                            <label>น้ำหนักที่ชั่งได้จริง (กก.):</label>
+                            <input type="number" id="actualWeight" step="0.01" placeholder="เช่น 0.65">
+                            <button onclick="runCheck()">ตรวจสอบ</button>
                         </div>
-                        <div id="resultBox" style="margin-top: 15px;"></div>
+                        <div id="resultBox"></div>
+                    </div>
+
+                    <!-- 🟢 ข้อความส่วนล่างห้ามตัดทิ้ง -->
+                    <div class="notes">
+                        <p>*** หมายเหตุ ใช้ค่าน้ำหนักเฉลี่ยในการกำหนดน้ำหนักลงบัญชีรับคืนเศษสายไฟชำรุด<br>
+                        โดยมีค่าเบี่ยงเบนเท่ากับค่าน้ำหนักต่ำสุดของผู้ผลิตสายไฟฟ้า</p>
+                        <p>1. กรณีน้ำหนักเศษสายไฟฟ้าที่ส่งคืนคลังพัสดุมีน้ำหนักน้อยกว่าค่าน้ำหนักเฉลี่ยแต่มีน้ำหนักไม่ต่ำกว่าค่าเบี่ยงเบน
+                        ให้ผู้ควบคุมงานจัดทำรายงานชี้แจงเหตุผล นำเสนอคณะกรรมการตรวจสอบงานก่อสร้างรับรองก่อนนำเสนอผู้จัดการ/ผู้อำนวยการ</p>
+                        <p>2. กรณีน้ำหนักเศษสายไฟฟ้าที่ส่งคืนคลังพัสดุมีน้ำหนักน้อยกว่าค่าเบี่ยงเบน ให้ตั้งคณะกรรมการสอบหาข้อเท็จจริง
+                        และให้ดำเนินการตามระเบียบที่เกี่ยวข้องต่อไป</p>
+                        <p>3. กรณีไม่มีข้อมูลน้ำหนักลงบัญชีรับคืนเศษสายไฟฟ้าชำรุดตามหลักเกณฑ์ ให้นำเศษสายไฟฟ้าที่ตัดมาได้มาชั่งแล้วเฉลี่ยน้ำหนักเป็นกิโลกรัมต่อเมตร</p>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- แท็บรอง: ฐานข้อมูลน้ำหนัก -->
         <section id="settings-tab" class="tab-content no-print">
             <div class="card">
                 <h3>📋 ฐานข้อมูลรหัสและน้ำหนักวัสดุตั้งต้น</h3>
