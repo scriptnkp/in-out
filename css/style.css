@@ -1,86 +1,98 @@
 /* css/style.css */
 :root {
-    --sheet-border: #b9c2cb;
+    --sheet-border: #000000; /* เปลี่ยนขอบเป็นสีดำให้เหมือนตารางจริง */
     --sheet-header-bg: #e2e8f0;
-    --sheet-text: #1f2a33;
+    --sheet-text: #000000;
     --blue-accent: #0b5ed7;
     --card-bg: #ffffff;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Sarabun', sans-serif; }
-body { background: #eef1f4; color: var(--sheet-text); font-size: 14px; padding-bottom: 50px; }
+/* 🟢 บังคับใช้ฟอนต์ราชการ (สารบรรณ) ทั้งโปรเจกต์ */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Sarabun', sans-serif !important; }
+body { background: #eef1f4; color: var(--sheet-text); font-size: 15px; padding-bottom: 50px; }
 
-/* องค์ประกอบ Navigation & Layout พื้นฐาน */
 .navbar { background: #1e293b; color: white; padding: 12px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 .nav-container { max-width: 950px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; }
 .brand { font-weight: 600; font-size: 1.1rem; }
-.tab-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 16px; cursor: pointer; font-size: 0.95rem; border-radius: 4px; transition: 0.2s; }
+.tab-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 16px; cursor: pointer; font-size: 1rem; border-radius: 4px; transition: 0.2s; }
 .tab-btn.active, .tab-btn:hover { color: white; background: rgba(255,255,255,0.1); font-weight: 600; }
 
 .container { max-width: 950px; margin: 25px auto; padding: 0 15px; }
-.card { background: var(--card-bg); padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #ddd; }
+.card { background: var(--card-bg); padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #b9c2cb; }
 .search-form { display: flex; gap: 12px; margin-top: 12px; }
-input[type="text"], input[type="number"] { flex: 1; padding: 8px 12px; border: 1px solid var(--sheet-border); border-radius: 4px; font-size: 0.95rem; outline: none; }
+input[type="text"], input[type="number"] { flex: 1; padding: 8px 12px; border: 1px solid #b9c2cb; border-radius: 4px; font-size: 1rem; outline: none; }
 input:focus { border-color: var(--blue-accent); box-shadow: 0 0 0 2px rgba(11,94,215,0.2); }
 
-button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.95rem; transition: 0.2s; }
+button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 1rem; transition: 0.2s; }
 .btn-main { background: var(--blue-accent); color: white; }
 .btn-print { background: #475569; color: white; }
 .btn-delete { background: #dc2626; color: white; }
 .btn-delete:disabled { background: #fca5a5; cursor: not-allowed; }
-.btn-delete-sm { background: #ef4444; color: white; padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; border: none; }
+.btn-delete-sm { background: #ef4444; color: white; padding: 4px 10px; font-size: 13px; border-radius: 4px; cursor: pointer; border: none; }
 
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* 🟢 ดีไซน์แผ่นรายงาน (Sheet) สไตล์ต้นฉบับ calc-scrap-weight */
-.sheet { background: #fff; border: 1px solid var(--sheet-border); padding-bottom: 20px; }
-.title { text-align: center; font-size: 19px; font-weight: 700; padding: 12px 12px 4px 12px; }
-.subtitle { text-align: center; font-size: 14px; padding: 0 8px 12px 8px; border-bottom: 1px solid var(--sheet-border); color: #555; }
-.file-row { padding: 10px 15px; border-bottom: 1px solid var(--sheet-border); font-size: 14px; background: #f8fafc; }
+/* 🟢 ดีไซน์แผ่นรายงาน (Sheet) */
+.sheet { background: #fff; border: 1px solid #b9c2cb; padding-bottom: 20px; }
+.title { text-align: center; font-size: 20px; font-weight: 700; padding: 15px 15px 5px 15px; }
+.subtitle { text-align: center; font-size: 15px; padding: 0 8px 15px 8px; border-bottom: 1px solid var(--sheet-border); }
+.file-row { padding: 12px 15px; border-bottom: 1px solid var(--sheet-border); font-size: 15px; background: #f8fafc; }
 
-/* 🟢 กล่องตัวเลข Stat-Box */
-.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); padding: 15px; gap: 15px; border-bottom: 1px solid var(--sheet-border); background: #f8fafc; }
-.stat-box { background: #fff; border: 1px solid var(--sheet-border); text-align: center; border-radius: 4px; overflow: hidden; }
-.stat-box .label { background: #e2e8f0; font-size: 13px; font-weight: 700; padding: 6px; border-bottom: 1px solid var(--sheet-border); }
-.stat-box .val { font-size: 22px; font-weight: 700; padding: 10px; color: #0b5ed7; }
+/* กล่อง Stat-Box 100% 90% 80% */
+.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); padding: 15px; gap: 15px; border-bottom: 1px solid var(--sheet-border); background: #fff; }
+.stat-box { border: 1px solid var(--sheet-border); text-align: center; border-radius: 4px; overflow: hidden; }
+.stat-box .label { background: #f2f2f2; font-size: 14px; font-weight: 700; padding: 8px; border-bottom: 1px solid var(--sheet-border); }
+.stat-box .val { font-size: 24px; font-weight: 700; padding: 12px; color: #000; }
 
-/* 🟢 ตารางข้อมูล (Data Table) */
+/* 🟢 ตารางข้อมูล */
 .table-wrapper { width: 100%; overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.data-table th, .data-table td { border: 1px solid var(--sheet-border); padding: 8px; }
-.data-table th { background: #e2e8f0; font-weight: 700; text-align: left; }
-.data-table tbody tr:nth-child(even) { background: #f8fafc; }
-.data-table tbody tr:hover { background-color: #f1f5f9; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 15px; table-layout: fixed; } /* ใช้ fixed เพื่อให้คุมความกว้างกรอบได้ */
+.data-table th, .data-table td { border: 1px solid var(--sheet-border); padding: 8px; vertical-align: middle; }
+.data-table th { background: #f2f2f2; font-weight: 700; text-align: left; }
+
+/* 🟢 จัดการชื่อวัสดุยาวๆ ให้ตัดขึ้นบรรทัดใหม่ */
+.col-name { white-space: normal; word-wrap: break-word; word-break: break-word; }
+/* 🟢 จัดการรหัสวัสดุให้อยู่พอดีกรอบ */
+.col-code { text-align: center; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .num { text-align: right; }
 .bold { font-weight: 700; }
 .text-right { text-align: right; }
-.total-row { background: #e2e8f0; font-weight: 700; font-size: 14px; }
-input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; }
+.total-row { background: #f2f2f2; font-weight: 700; font-size: 15px; }
+input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
 .hidden { display: none !important; }
 
-/* 🟢 สถานะการตรวจสอบน้ำหนัก */
+/* สถานะตรวจสอบน้ำหนัก */
 .check-section { margin: 20px 15px 0 15px; padding: 15px; background: #f8fafc; border: 1px solid var(--sheet-border); border-radius: 4px; }
-.status-box { padding: 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; margin-top: 10px;}
+.status-box { padding: 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 15px; margin-top: 10px;}
 .good { background: #d1e7dd; color: #0f5132; border-color: #badbcc; }
 .warn { background: #fff3cd; color: #664d03; border-color: #ffecb5; }
 .bad { background: #f8d7da; color: #842029; border-color: #f5c2c7; }
 
-/* 🏛️ ระบบหน้าพิมพ์ (Print CSS) ตัดขอบสีที่ไม่จำเป็นออก */
+/* 🏛️ 🟢 ระบบพิมพ์ (Print CSS) ข้อความห้ามตัดขาด หน้ากระดาษสมบูรณ์ */
 @media print {
-    @page { size: A4 portrait; margin: 10mm; }
-    body { background: white; padding: 0; }
+    @page { 
+        size: A4 portrait; 
+        margin: 15mm 10mm; /* บังคับมีระยะขอบเพื่อไม่ให้ข้อความส่วนหัว/ท้ายตกขอบ */
+    }
+    body { background: white; padding: 0; color: black; }
     .no-print { display: none !important; }
     .container { max-width: 100%; margin: 0; padding: 0; }
     .sheet { border: none; }
-    .data-table { border: 1px solid #000; }
-    .data-table th, .data-table td { border: 1px solid #000; padding: 6px; font-size: 12pt; color: #000; }
-    .data-table th, .total-row { background: #f2f2f2 !important; -webkit-print-color-adjust: exact; }
-    .file-row { background: white; padding: 5px 0; border-bottom: none; }
+    
+    /* สั่งพิมพ์สีตารางและเส้นขอบให้คมกริบ */
+    .data-table, .data-table th, .data-table td, .stat-box { border: 1px solid #000 !important; }
+    .data-table th, .total-row, .stat-box .label { background: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .data-table th, .data-table td { font-size: 12pt; color: #000; padding: 5px; }
+    
+    .file-row { background: white; padding: 5px 0; border-bottom: none; font-size: 14pt; }
     .summary-grid { padding: 10px 0; gap: 10px; background: white; border-bottom: none; }
-    .stat-box { border: 1px solid #000; }
-    .stat-box .label { background: #f2f2f2 !important; border-bottom: 1px solid #000; -webkit-print-color-adjust: exact; }
-    .stat-box .val { color: #000 !important; font-size: 18pt; }
-    tr { page-break-inside: avoid; }
+    .stat-box .val { color: #000 !important; font-size: 16pt; }
+    
+    /* ป้องกันตารางและกล่องหัว-ท้าย ขาดครึ่งหน้า */
+    .title, .subtitle, .file-row, .summary-grid, .total-row { page-break-inside: avoid; }
+    .data-table tr { page-break-inside: avoid; }
+    thead { display: table-header-group; } /* ให้หัวตารางโชว์ซ้ำทุกหน้า */
+    tfoot { display: table-footer-group; }
 }
