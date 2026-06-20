@@ -47,29 +47,31 @@ function renderResultTable() {
     if (currentViewData.length === 0) {
         tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red; padding:20px;">❌ ไม่พบรายการข้อมูลพัสดุสำหรับรหัสโครงข่ายนี้</td></tr>`;
         updateMetrics(0);
-        document.getElementById('header-wbs-network').innerHTML = '<b>องค์ประกอบ WBS:</b> - &nbsp;&nbsp;|&nbsp;&nbsp; <b>โครงข่าย:</b> -';
+        document.getElementById('header-wbs').innerText = '-';
+        document.getElementById('header-network').innerText = '-';
         return;
     }
 
-    // 🟢 ย้าย WBS และ โครงข่าย มาจัดวางบรรทัดเดียวกัน
+    // 🟢 กระจาย WBS และ โครงข่าย ลงในกล่อง Meta ด้านบนตาราง
     const uniqueWBS = [...new Set(currentViewData.map(i => i.wbs))].join(', ');
     const networkVal = currentViewData[0].network;
-    document.getElementById('header-wbs-network').innerHTML = `<b>องค์ประกอบ WBS:</b> ${uniqueWBS} &nbsp;&nbsp;|&nbsp;&nbsp; <b>โครงข่าย:</b> <span style="color:#0b5ed7;">${networkVal}</span>`;
+    document.getElementById('header-wbs').innerText = uniqueWBS;
+    document.getElementById('header-network').innerText = networkVal;
 
     currentViewData.forEach((item, index) => {
         const localWeightInfo = window.weightData ? window.weightData[item.materialCode] : null;
         const weightInfo = localWeightInfo || { weight: 0.00, unit: 'กก.' };
         
-        // 🟢 ใช้ปริมาณความต้องการ (reqQty) เป็นหลัก
+        // 🟢 คำนวณจากปริมาณความต้องการ (reqQty) 
         const qty = item.reqQty !== undefined ? item.reqQty : (item.diffQty || 0);
         const totalRowWeight = qty * weightInfo.weight;
         grandTotal += totalRowWeight;
 
         const isChecked = selectedRows.has(index) ? 'checked' : '';
 
-        // 🟢 กำหนด class="col-code" ให้รหัสพอดีกรอบ และ class="col-name" ให้ชื่อยาวตัดขึ้นบรรทัดใหม่
+        // แสดงผลในตาราง (จัดคอลัมน์ชื่อและรหัสให้ตัดบรรทัด)
         tbody.innerHTML += `
-            <tr>
+            <tr class="${isChecked ? 'row-selected' : ''}">
                 <td class="no-print" style="text-align:center;">
                     <input type="checkbox" class="row-checkbox" data-index="${index}" onchange="toggleRowSelection(this)" ${isChecked}>
                 </td>
@@ -78,7 +80,7 @@ function renderResultTable() {
                 <td class="col-name">${item.description}</td>
                 <td class="num">${qty.toLocaleString()}</td>
                 <td class="num">${weightInfo.weight.toFixed(3)}</td>
-                <td class="num bold">${totalRowWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td class="num">${totalRowWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 <td style="text-align:center;">${weightInfo.unit}</td>
                 <td class="no-print action-col" style="text-align:center;">
                     <button onclick="removeItem(${index})" class="btn-delete-sm">ลบ</button>
@@ -103,7 +105,7 @@ function updateMetrics(totalWeight) {
     document.getElementById('weight-80').innerText = w80.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 }
 
-// 🟢 ฟังก์ชันตรวจสอบน้ำหนักจริง
+// 🟢 ฟังก์ชันตรวจสอบน้ำหนักจริง เทียบตามสไตล์ของไฟล์ตัวอย่าง
 function runCheck() {
     const actual = parseFloat(document.getElementById('actualWeight').value);
     const box = document.getElementById('resultBox');
@@ -114,17 +116,16 @@ function runCheck() {
     const w90 = w100 * 0.9;
     const w80 = w100 * 0.8;
 
-    let status = '', cls = '', note = '';
-
+    let r = {};
     if (actual >= w90) {
-        status = 'ผ่านเกณฑ์'; cls = 'good'; note = 'น้ำหนักอยู่ในเกณฑ์มาตรฐาน (≥ 90%)';
+        r = { status: 'ปกติ', cls: 'ok', note: 'น้ำหนักไม่ต่ำกว่าค่าเฉลี่ย (90%)' };
     } else if (actual >= w80) {
-        status = 'ต่ำกว่าเกณฑ์เฉลี่ย'; cls = 'warn'; note = 'น้ำหนักน้อยกว่าค่าเฉลี่ย (90%) แต่ไม่ต่ำกว่าค่าเบี่ยงเบน (80%)';
+        r = { status: 'ต่ำกว่าค่าเฉลี่ย', cls: 'warn', note: 'น้ำหนักน้อยกว่าค่าเฉลี่ย (90%) แต่ไม่ต่ำกว่าค่าเบี่ยงเบน (80%)' };
     } else {
-        status = 'ต่ำกว่าค่าเบี่ยงเบน'; cls = 'bad'; note = 'น้ำหนักต่ำกว่าค่าเบี่ยงเบน (80%)';
+        r = { status: 'ต่ำกว่าค่าเบี่ยงเบน', cls: 'bad', note: 'น้ำหนักต่ำกว่าค่าเบี่ยงเบน (80%)' };
     }
 
-    box.innerHTML = `<div class="status-box ${cls}"><b>สถานะ:</b> ${status}<br><small>${note}</small></div>`;
+    box.innerHTML = `<div class="result ${r.cls}">น้ำหนักจริง ${actual} กก. → สถานะ: ${r.status} <br><small>(${r.note})</small></div>`;
 }
 
 // ฟังก์ชันติ๊กถูกลบ Checkbox
@@ -155,7 +156,7 @@ function updateDeleteButtonState() {
     const btn = document.getElementById('delete-selected-btn');
     if (!btn) return;
     btn.disabled = selectedRows.size === 0;
-    btn.innerText = selectedRows.size > 0 ? `🗑️ ลบรายการที่ติ๊ก (${selectedRows.size})` : '🗑️ ลบรายการที่ติ๊กเลือก';
+    btn.innerText = selectedRows.size > 0 ? `🗑️ ลบรายการที่เลือก (${selectedRows.size})` : '🗑️ ลบรายการที่เลือก';
 }
 
 function deleteSelectedRows() {
@@ -164,7 +165,7 @@ function deleteSelectedRows() {
     currentViewData = currentViewData.filter((_, idx) => !selectedRows.has(idx));
     selectedRows.clear();
     renderResultTable();
-    document.getElementById('resultBox').innerHTML = ''; 
+    document.getElementById('resultBox').innerHTML = '';
 }
 
 function removeItem(idx) {
@@ -175,11 +176,11 @@ function removeItem(idx) {
     }
 }
 
-// ฐานข้อมูลน้ำหนัก (แท็บที่ 2)
+// ฐานข้อมูลน้ำหนัก
 function loadWeightTable() {
     const tbody = document.getElementById('weight-list-tbody');
     if (typeof window.weightData === 'undefined') {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">❌ ไม่พบข้อมูลพัสดุในระบบ</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">❌ ไม่พบข้อมูลพัสดุในไฟล์ระบบ</td></tr>`;
         return;
     }
     tbody.innerHTML = '';
@@ -190,7 +191,7 @@ function loadWeightTable() {
                 <td style="font-weight:600; text-align:center;">${code}</td>
                 <td>${w.description}</td>
                 <td class="num bold" style="color:#16a34a;">${w.weight.toFixed(3)}</td>
-                <td style="text-align:center;">${w.unit}</td>
+                <td style="text-align:center; color:#666;">${w.unit}</td>
             </tr>
         `;
     }
