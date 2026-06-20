@@ -1,16 +1,8 @@
 /* css/style.css */
-:root {
-    --sheet-border: #000000; /* เปลี่ยนขอบเป็นสีดำให้เหมือนตารางจริง */
-    --sheet-header-bg: #e2e8f0;
-    --sheet-text: #000000;
-    --blue-accent: #0b5ed7;
-    --card-bg: #ffffff;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Sarabun', 'TH Sarabun New', sans-serif !important; }
+body { background: #eef1f4; color: #1f2a33; font-size: 14px; padding-bottom: 50px; }
 
-/* 🟢 บังคับใช้ฟอนต์ราชการ (สารบรรณ) ทั้งโปรเจกต์ */
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Sarabun', sans-serif !important; }
-body { background: #eef1f4; color: var(--sheet-text); font-size: 15px; padding-bottom: 50px; }
-
+/* นาวิเกชั่นและการจัดการเลย์เอาต์หลัก */
 .navbar { background: #1e293b; color: white; padding: 12px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 .nav-container { max-width: 950px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; }
 .brand { font-weight: 600; font-size: 1.1rem; }
@@ -18,13 +10,13 @@ body { background: #eef1f4; color: var(--sheet-text); font-size: 15px; padding-b
 .tab-btn.active, .tab-btn:hover { color: white; background: rgba(255,255,255,0.1); font-weight: 600; }
 
 .container { max-width: 950px; margin: 25px auto; padding: 0 15px; }
-.card { background: var(--card-bg); padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #b9c2cb; }
+.card { background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #b9c2cb; }
 .search-form { display: flex; gap: 12px; margin-top: 12px; }
 input[type="text"], input[type="number"] { flex: 1; padding: 8px 12px; border: 1px solid #b9c2cb; border-radius: 4px; font-size: 1rem; outline: none; }
-input:focus { border-color: var(--blue-accent); box-shadow: 0 0 0 2px rgba(11,94,215,0.2); }
+input:focus { border-color: #1f3a5f; box-shadow: 0 0 0 2px rgba(31,58,95,0.2); }
 
 button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 1rem; transition: 0.2s; }
-.btn-main { background: var(--blue-accent); color: white; }
+.btn-main { background: #1f3a5f; color: white; }
 .btn-print { background: #475569; color: white; }
 .btn-delete { background: #dc2626; color: white; }
 .btn-delete:disabled { background: #fca5a5; cursor: not-allowed; }
@@ -32,67 +24,93 @@ button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; f
 
 .tab-content { display: none; }
 .tab-content.active { display: block; }
+.hidden { display: none !important; }
 
-/* 🟢 ดีไซน์แผ่นรายงาน (Sheet) */
-.sheet { background: #fff; border: 1px solid #b9c2cb; padding-bottom: 20px; }
-.title { text-align: center; font-size: 20px; font-weight: 700; padding: 15px 15px 5px 15px; }
-.subtitle { text-align: center; font-size: 15px; padding: 0 8px 15px 8px; border-bottom: 1px solid var(--sheet-border); }
-.file-row { padding: 12px 15px; border-bottom: 1px solid var(--sheet-border); font-size: 15px; background: #f8fafc; }
+/* 🟢 ดีไซน์แผ่นรายงาน (Sheet) สไตล์ต้นฉบับ 100% */
+.sheet { background: #fff; border: 1px solid #b9c2cb; }
+.title { text-align: center; font-size: 19px; font-weight: 700; padding: 12px; border-bottom: 1px solid #b9c2cb; }
+.subtitle { text-align: center; font-size: 14px; padding: 8px; border-bottom: 1px solid #b9c2cb; }
+.file-row { display: grid; grid-template-columns: 1fr 2fr; border-bottom: 1px solid #b9c2cb; font-size: 13px; }
+.file-row div { padding: 6px 10px; border-right: 1px solid #e3e7eb; }
+.file-row div:last-child { border-right: none; }
+.file-row .label { text-decoration: underline; font-weight: 600; }
 
-/* กล่อง Stat-Box 100% 90% 80% */
-.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); padding: 15px; gap: 15px; border-bottom: 1px solid var(--sheet-border); background: #fff; }
-.stat-box { border: 1px solid var(--sheet-border); text-align: center; border-radius: 4px; overflow: hidden; }
-.stat-box .label { background: #f2f2f2; font-size: 14px; font-weight: 700; padding: 8px; border-bottom: 1px solid var(--sheet-border); }
-.stat-box .val { font-size: 24px; font-weight: 700; padding: 12px; color: #000; }
+.meta { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid #b9c2cb; font-size: 13px; }
+.meta div { padding: 6px 10px; border-right: 1px solid #e3e7eb; }
+.meta div:last-child { border-right: none; }
+.meta .label { color: #5b6670; font-size: 11px; }
+.meta .value { font-weight: 600; }
 
-/* 🟢 ตารางข้อมูล */
+/* กล่อง Threshold 100% 90% 80% */
+.thresh-heading { background: #f3f5f7; text-align: center; font-size: 12px; font-weight: 700; padding: 6px; border-bottom: 1px solid #b9c2cb; }
+.thresholds { display: flex; flex-wrap: nowrap; gap: 1px; background: #b9c2cb; border-bottom: 1px solid #b9c2cb; }
+.thresh-card { flex: 1 1 0; min-width: 0; background: #fff; padding: 14px 10px; text-align: center; }
+.thresh-card .pct { font-size: 12px; font-weight: 700; letter-spacing: .03em; padding: 3px 10px; border-radius: 999px; display: inline-block; margin-bottom: 8px; }
+.thresh-card.p100 .pct { background: #1f3a5f; color: #fff; }
+.thresh-card.p90  .pct { background: #c98a1a; color: #fff; }
+.thresh-card.p80  .pct { background: #b3261e; color: #fff; }
+.thresh-card .val { font-size: 26px; font-weight: 700; }
+.thresh-card .unit { font-size: 12px; color: #5b6670; }
+.thresh-card .desc { font-size: 11px; color: #5b6670; margin-top: 4px; line-height: 1.5; }
+
+/* 🟢 ตารางข้อมูล (Table) */
 .table-wrapper { width: 100%; overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 15px; table-layout: fixed; } /* ใช้ fixed เพื่อให้คุมความกว้างกรอบได้ */
-.data-table th, .data-table td { border: 1px solid var(--sheet-border); padding: 8px; vertical-align: middle; }
-.data-table th { background: #f2f2f2; font-weight: 700; text-align: left; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+.data-table th, .data-table td { border: 1px solid #d6dbe0; padding: 6px 8px; vertical-align: middle; }
+.data-table th { background: #f3f5f7; font-weight: 700; text-align: center; }
 
-/* 🟢 จัดการชื่อวัสดุยาวๆ ให้ตัดขึ้นบรรทัดใหม่ */
-.col-name { white-space: normal; word-wrap: break-word; word-break: break-word; }
-/* 🟢 จัดการรหัสวัสดุให้อยู่พอดีกรอบ */
+/* บังคับตัดคำ รหัสและชื่อ */
 .col-code { text-align: center; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.col-name { text-align: left; white-space: normal; word-wrap: break-word; word-break: break-word; }
 
 .num { text-align: right; }
 .bold { font-weight: 700; }
 .text-right { text-align: right; }
-.total-row { background: #f2f2f2; font-weight: 700; font-size: 15px; }
-input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
-.hidden { display: none !important; }
+.data-table tfoot td { font-weight: 700; background: #f8f9fa; }
+.total-label { text-align: right; }
+.total-val { text-align: center; }
 
-/* สถานะตรวจสอบน้ำหนัก */
-.check-section { margin: 20px 15px 0 15px; padding: 15px; background: #f8fafc; border: 1px solid var(--sheet-border); border-radius: 4px; }
-.status-box { padding: 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 15px; margin-top: 10px;}
-.good { background: #d1e7dd; color: #0f5132; border-color: #badbcc; }
-.warn { background: #fff3cd; color: #664d03; border-color: #ffecb5; }
-.bad { background: #f8d7da; color: #842029; border-color: #f5c2c7; }
+input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; }
 
-/* 🏛️ 🟢 ระบบพิมพ์ (Print CSS) ข้อความห้ามตัดขาด หน้ากระดาษสมบูรณ์ */
+/* 🟢 ตรวจสอบน้ำหนักจริง */
+.check-box { padding: 14px; border-top: 2px solid #1f2a33; }
+.check-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.check-row label { font-size: 13px; font-weight: 600;}
+.check-row input { width: 150px; padding: 6px 8px; border: 1px solid #b9c2cb; border-radius: 4px; font-size: 14px; }
+.result { padding: 10px 14px; border-radius: 6px; font-size: 14px; font-weight: 600; }
+.result.ok    { background: #e6f4ea; color: #1e6b34; border: 1px solid #b6e0c2; }
+.result.warn  { background: #fff4e0; color: #8a5a00; border: 1px solid #f3d9a0; }
+.result.bad   { background: #fde7e6; color: #9c2a23; border: 1px solid #f5b9b5; }
+
+/* 🟢 หมายเหตุท้ายตาราง */
+.notes { border-top: 1px solid #b9c2cb; padding: 10px 14px; font-size: 12px; color: #3c4650; line-height: 1.7; text-align: left; }
+.notes p { margin: 0 0 8px; }
+.notes p:last-child { margin-bottom: 0; }
+
+/* 🏛️ ระบบพิมพ์ (Print CSS) ข้อความห้ามตัดขาด หน้ากระดาษสมบูรณ์ */
 @media print {
-    @page { 
-        size: A4 portrait; 
-        margin: 15mm 10mm; /* บังคับมีระยะขอบเพื่อไม่ให้ข้อความส่วนหัว/ท้ายตกขอบ */
-    }
+    @page { size: A4 portrait; margin: 15mm 10mm; }
     body { background: white; padding: 0; color: black; }
     .no-print { display: none !important; }
     .container { max-width: 100%; margin: 0; padding: 0; }
+    
     .sheet { border: none; }
+    .data-table { border: 1px solid #000; }
+    .data-table th, .data-table td { border: 1px solid #000; padding: 5px; font-size: 11pt; color: #000; }
+    .data-table th, tfoot td { background: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     
-    /* สั่งพิมพ์สีตารางและเส้นขอบให้คมกริบ */
-    .data-table, .data-table th, .data-table td, .stat-box { border: 1px solid #000 !important; }
-    .data-table th, .total-row, .stat-box .label { background: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .data-table th, .data-table td { font-size: 12pt; color: #000; padding: 5px; }
+    /* กล่องเปอร์เซ็นต์สีต้องมาเต็มตอนพิมพ์ */
+    .thresh-card.p100 .pct { background: #1f3a5f !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .thresh-card.p90  .pct { background: #c98a1a !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .thresh-card.p80  .pct { background: #b3261e !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     
-    .file-row { background: white; padding: 5px 0; border-bottom: none; font-size: 14pt; }
-    .summary-grid { padding: 10px 0; gap: 10px; background: white; border-bottom: none; }
-    .stat-box .val { color: #000 !important; font-size: 16pt; }
-    
+    /* ซ่อนคอลัมน์ Checkbox และ จัดการ ตอนพิมพ์ */
+    .data-table th:first-child, .data-table td:first-child { display: none !important; }
+
     /* ป้องกันตารางและกล่องหัว-ท้าย ขาดครึ่งหน้า */
-    .title, .subtitle, .file-row, .summary-grid, .total-row { page-break-inside: avoid; }
+    .title, .subtitle, .file-row, .meta, .thresh-heading, .thresholds { page-break-inside: avoid; }
+    .notes { page-break-inside: avoid; }
     .data-table tr { page-break-inside: avoid; }
-    thead { display: table-header-group; } /* ให้หัวตารางโชว์ซ้ำทุกหน้า */
+    thead { display: table-header-group; }
     tfoot { display: table-footer-group; }
 }
