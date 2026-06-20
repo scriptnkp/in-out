@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบคำนวณเศษเหล็กและเศษสายพัสดุ</title>
+    <title>โปรแกรมคำนวณเศษเหล็กและเศษสายไฟฟ้า</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
 </head>
 <body>
 
-    <nav class="navbar">
+    <nav class="navbar no-print">
         <div class="nav-container">
             <span class="brand">📊 ระบบคำนวณเศษเหล็กและเศษสายจากระบบ SAP</span>
             <div class="nav-links">
@@ -23,7 +23,7 @@
 
     <main class="container">
         <section id="search-tab" class="tab-content active">
-            <div class="card search-card">
+            <div class="card search-card no-print">
                 <h3>🔍 ป้อนรหัสโครงข่ายพัสดุเพื่อจัดทำรายงาน</h3>
                 <div class="search-form">
                     <input type="text" id="network-input" placeholder="กรอกรหัสโครงข่าย เช่น 8005321538" onkeypress="if(event.key === 'Enter') searchNetworkData()">
@@ -32,66 +32,77 @@
             </div>
 
             <div id="result-card" class="hidden">
-                <div class="metrics-grid">
-                    <div class="metric-card card-100">
-                        <span class="metric-title">น้ำหนักสุทธิรวม (100%)</span>
-                        <div class="metric-value"><span id="weight-100">0.00</span> <small>กก.</small></div>
-                    </div>
-                    <div class="metric-card card-90">
-                        <span class="metric-title">ปรับลดเป้าหมาย (90%)</span>
-                        <div class="metric-value"><span id="weight-90">0.00</span> <small>กก.</small></div>
-                    </div>
-                    <div class="metric-card card-80">
-                        <span class="metric-title">ปรับลดเป้าหมาย (80%)</span>
-                        <div class="metric-value"><span id="weight-80">0.00</span> <small>กก.</small></div>
-                    </div>
+                <div class="report-actions no-print" style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                    <button id="delete-selected-btn" onclick="deleteSelectedRows()" class="btn-delete" disabled>🗑️ ลบรายการที่เลือก</button>
+                    <button onclick="window.print()" class="btn-print">🖨️ พิมพ์รายงาน</button>
                 </div>
 
-                <div class="sheet-container">
-                    <div class="report-header">
-                        <div class="sheet-title">📄 รายการสรุปคำนวณปริมาณและน้ำหนักวัสดุอุปกรณ์</div>
-                        <div class="header-actions">
-                            <button id="delete-selected-btn" onclick="deleteSelectedRows()" class="btn-delete" disabled>🗑️ ลบรายการที่เลือก</button>
-                            <button onclick="window.print()" class="btn-print">🖨️ พิมพ์รายงานมาตรฐาน</button>
+                <div class="sheet">
+                    <div class="title">โปรแกรมคำนวณเศษเหล็กและเศษสายไฟฟ้า</div>
+                    <div class="subtitle">(รายงานสรุปปริมาณและน้ำหนักวัสดุอุปกรณ์พัสดุ)</div>
+
+                    <div class="file-row">
+                        <div><b>WBS / โครงข่าย:</b> <span id="header-wbs-network" style="color: #0b5ed7; font-weight: 600;">-</span></div>
+                    </div>
+
+                    <div class="summary-grid">
+                        <div class="stat-box">
+                            <div class="label">น้ำหนักสุทธิรวม (100%)</div>
+                            <div class="val" id="weight-100">0.00</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="label">เป้าหมายขั้นต่ำ (90%)</div>
+                            <div class="val" id="weight-90">0.00</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="label">ค่าเบี่ยงเบน (80%)</div>
+                            <div class="val" id="weight-80">0.00</div>
                         </div>
                     </div>
-                    
-                    <div class="table-wrapper">
-                        <table class="google-sheet-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 40px; text-align: center;">
-                                        <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this)">
-                                    </th>
-                                    <th style="width: 50px; text-align: center;">ลำดับ</th>
-                                    <th style="width: 180px;">องค์ประกอบ WBS</th>
-                                    <th style="width: 130px;">รหัสพัสดุ</th>
-                                    <th>รายการอุปกรณ์พัสดุ</th>
-                                    <th class="num" style="width: 100px;">ปริมาณความต้องการ</th>
-                                    <th class="num" style="width: 110px;">นน./หน่วย</th>
-                                    <th style="width: 80px; text-align: center;">หน่วย</th>
-                                    <th class="num" style="width: 140px;">รวมน้ำหนัก (กก.)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="result-tbody">
-                            </tbody>
-                            <tfoot>
-                                <tr class="total-row">
-                                    <td colspan="8" class="text-right bold">น้ำหนักสุทธิรวมทั้งสิ้น (กิโลกรัม):</td>
-                                    <td id="grand-total-val" class="num bold">0.00</td>
-                                </tr>
-                            </tfoot>
-                        </table>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th class="no-print" style="width: 40px; text-align: center;">
+                                    <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this)">
+                                </th>
+                                <th style="width: 60px; text-align: center;">ลำดับ</th>
+                                <th style="width: 140px;">รหัสพัสดุ</th>
+                                <th>ชื่อวัสดุอุปกรณ์</th>
+                                <th class="num" style="width: 90px;">จำนวน</th>
+                                <th class="num" style="width: 100px;">นน./หน่วย</th>
+                                <th class="num" style="width: 120px;">น้ำหนักรวม</th>
+                                <th style="width: 70px; text-align: center;">หน่วย</th>
+                                <th class="no-print action-col" style="width: 70px; text-align: center;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="result-tbody"></tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="6" class="text-right bold">น้ำหนักสุทธิรวมทั้งสิ้น (กิโลกรัม):</td>
+                                <td id="grand-total-val" class="num bold" style="color: #0b5ed7; font-size: 16px;">0.00</td>
+                                <td colspan="2" class="no-print"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <div class="check-section no-print">
+                        <h4 style="margin-bottom: 10px; color: #1e293b;">⚖️ ตรวจสอบเทียบน้ำหนักจริง</h4>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="actualWeight" placeholder="กรอกน้ำหนักที่ชั่งได้จริง (กก.)" style="width: 250px;">
+                            <button onclick="runCheck()" class="btn-main">ตรวจสอบสถานะ</button>
+                        </div>
+                        <div id="resultBox" style="margin-top: 15px;"></div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="settings-tab" class="tab-content">
-            <div class="sheet-container">
-                <h3>📋 รายการรหัสและน้ำหนักวัสดุตั้งต้น (อัปเดตตรงจากระบบไฟล์คลัง)</h3>
+        <section id="settings-tab" class="tab-content no-print">
+            <div class="card">
+                <h3>📋 รายการรหัสและน้ำหนักวัสดุตั้งต้น</h3>
                 <div class="table-wrapper" style="margin-top:15px;">
-                    <table class="google-sheet-table">
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th style="width: 150px;">รหัสวัสดุ</th>
