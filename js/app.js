@@ -62,14 +62,14 @@ function renderResultTable() {
         const localWeightInfo = window.weightData ? window.weightData[item.materialCode] : null;
         const weightInfo = localWeightInfo || { weight: 0.00, unit: 'กก.' };
         
-        // 🟢 คำนวณจากปริมาณความต้องการ (reqQty) 
+        // 🟢 ใช้ปริมาณความต้องการ (reqQty) เป็นหลัก
         const qty = item.reqQty !== undefined ? item.reqQty : (item.diffQty || 0);
         const totalRowWeight = qty * weightInfo.weight;
         grandTotal += totalRowWeight;
 
         const isChecked = selectedRows.has(index) ? 'checked' : '';
 
-        // แสดงผลในตาราง (จัดคอลัมน์ชื่อและรหัสให้ตัดบรรทัด)
+        // 🟢 ฝัง Class .col-code และ .col-name เพื่อให้ CSS ตัดคำยาวๆ ได้สมบูรณ์
         tbody.innerHTML += `
             <tr class="${isChecked ? 'row-selected' : ''}">
                 <td class="no-print" style="text-align:center;">
@@ -80,7 +80,7 @@ function renderResultTable() {
                 <td class="col-name">${item.description}</td>
                 <td class="num">${qty.toLocaleString()}</td>
                 <td class="num">${weightInfo.weight.toFixed(3)}</td>
-                <td class="num">${totalRowWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td class="num bold">${totalRowWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 <td style="text-align:center;">${weightInfo.unit}</td>
                 <td class="no-print action-col" style="text-align:center;">
                     <button onclick="removeItem(${index})" class="btn-delete-sm">ลบ</button>
@@ -165,7 +165,7 @@ function deleteSelectedRows() {
     currentViewData = currentViewData.filter((_, idx) => !selectedRows.has(idx));
     selectedRows.clear();
     renderResultTable();
-    document.getElementById('resultBox').innerHTML = '';
+    document.getElementById('resultBox').innerHTML = ''; 
 }
 
 function removeItem(idx) {
@@ -176,11 +176,11 @@ function removeItem(idx) {
     }
 }
 
-// ฐานข้อมูลน้ำหนัก
+// ฐานข้อมูลน้ำหนัก (แท็บที่ 2)
 function loadWeightTable() {
     const tbody = document.getElementById('weight-list-tbody');
     if (typeof window.weightData === 'undefined') {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">❌ ไม่พบข้อมูลพัสดุในไฟล์ระบบ</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">❌ ไม่พบข้อมูลพัสดุในระบบ</td></tr>`;
         return;
     }
     tbody.innerHTML = '';
