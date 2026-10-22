@@ -7,11 +7,11 @@
     --card-bg: #ffffff;
 }
 
-/* 🟢 บังคับฟอนต์ราชการและรีเซ็ตค่าพื้นฐาน */
+/* บังคับฟอนต์ราชการและรีเซ็ตค่าพื้นฐาน */
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Sarabun', sans-serif !important; }
 body { background: #eef1f4; color: var(--sheet-text); font-size: 15px; padding-bottom: 50px; }
 
-/* 🟢 ปรับลดความกว้าง จัดฟอร์มให้อยู่ตรงกลาง ไม่ชิดขอบจอ */
+/* ปรับลดความกว้าง จัดฟอร์มให้อยู่ตรงกลาง ไม่ชิดขอบจอ */
 .navbar { background: #1e293b; color: white; padding: 12px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 .nav-container { max-width: 1050px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
 .brand { font-weight: 600; font-size: 1.1rem; }
@@ -23,8 +23,29 @@ body { background: #eef1f4; color: var(--sheet-text); font-size: 15px; padding-b
 
 /* ฟอร์มและปุ่มกด */
 .search-form { display: flex; gap: 12px; margin-top: 12px; }
-input[type="text"], input[type="number"] { flex: 1; padding: 8px 12px; border: 1px solid var(--sheet-border); border-radius: 4px; font-size: 1rem; outline: none; }
+input[type="text"], input[type="number"]:not(.qty-input) { flex: 1; padding: 8px 12px; border: 1px solid var(--sheet-border); border-radius: 4px; font-size: 1rem; outline: none; }
 input:focus { border-color: var(--blue-accent); box-shadow: 0 0 0 2px rgba(11,94,215,0.2); }
+
+/* 🟢 สไตล์สำหรับช่องแก้ไขจำนวนในตาราง */
+.qty-input {
+    width: 100%;
+    padding: 4px 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    text-align: right;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0b5ed7;
+    background: #f8fafc;
+    transition: 0.2s;
+}
+.qty-input:hover { border-color: #94a3b8; }
+.qty-input:focus {
+    border-color: var(--blue-accent);
+    background: #ffffff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(11,94,215,0.15);
+}
 
 button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 1rem; transition: 0.2s; }
 .btn-main { background: var(--blue-accent); color: white; }
@@ -37,7 +58,7 @@ button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; f
 .tab-content.active { display: block; }
 .hidden { display: none !important; }
 
-/* 🟢 ดีไซน์แผ่นรายงาน (Sheet) */
+/* ดีไซน์แผ่นรายงาน (Sheet) */
 .sheet { background: #fff; border: 1px solid var(--sheet-border); padding-bottom: 20px; }
 .title { text-align: center; font-size: 22px; font-weight: 700; padding: 15px 15px 5px 15px; }
 .subtitle { text-align: center; font-size: 16px; padding: 0 8px 15px 8px; border-bottom: 1px solid var(--sheet-border); color: #333;}
@@ -69,7 +90,7 @@ button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; f
 .thresh-card .unit { font-size: 13px; color: #5b6670; margin-bottom: 5px; }
 .thresh-card .desc { font-size: 12px; color: #5b6670; line-height: 1.4; }
 
-/* 🟢 ตารางข้อมูล (Data Table) */
+/* ตารางข้อมูล (Data Table) */
 .table-wrapper { width: 100%; overflow-x: auto; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 15px; table-layout: fixed; border-top: 2px solid #000; border-bottom: 2px solid #000; }
 .data-table th, .data-table td { border: 1px solid var(--sheet-border); padding: 8px; vertical-align: middle; }
@@ -104,16 +125,14 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
 .notes p { margin: 0 0 8px; }
 .notes p:last-child { margin-bottom: 0; }
 
-/* 🏛️ 🟢 ระบบพิมพ์ (Print CSS) มาตรฐานราชการ Lock A4 */
+/* 🏛️ ระบบพิมพ์ (Print CSS) มาตรฐานราชการ Lock A4 */
 @media print {
     @page { 
         size: A4 portrait; 
-        margin: 1.5in 1in 1in 1.5in !important; /* 🟢 ระยะขอบราชการ ซ้าย/บน 1.5 นิ้ว, ขวา/ล่าง 1 นิ้ว */
+        margin: 1.5in 1in 1in 1.5in !important; /* ระยะขอบราชการ ซ้าย/บน 1.5 นิ้ว, ขวา/ล่าง 1 นิ้ว */
     }
     
     body { background: white; padding: 0; color: black; font-size: 10pt; }
-    
-    /* 🟢 ใช้ Zoom 0.85 เพื่อบีบเนื้อหาทั้งหมดลงล็อก A4 1 หน้าแบบพอดีเป๊ะ */
     html { zoom: 0.85; }
     
     .no-print { display: none !important; }
@@ -138,6 +157,22 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
     .data-table th, .data-table td { border: 1px solid #000; padding: 4px; font-size: 9pt; color: #000; }
     .data-table th, tfoot td { background: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     
+    /* 🟢 ซ่อนกรอบและปุ่มลูกศรของช่อง Input ตอนสั่งพิมพ์ ให้กลืนเป็นตัวหนังสือธรรมดา */
+    .qty-input {
+        border: none !important;
+        background: transparent !important;
+        color: #000 !important;
+        font-size: 9pt !important;
+        font-weight: normal !important;
+        padding: 0 !important;
+        -moz-appearance: textfield;
+    }
+    .qty-input::-webkit-outer-spin-button,
+    .qty-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
     /* ขยายความกว้างช่องให้เหมาะสมตอนพิมพ์ */
     .col-code-th { width: 22%; }
     .col-name-th { width: 45%; }
@@ -147,7 +182,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
     .notes { padding: 8px 0; font-size: 9pt; line-height: 1.3; border-top: none; }
     .notes p { margin: 0 0 3px; }
     
-    /* 🟢 ล็อกห้ามหน้ากระดาษฉีกกลางเวลาพิมพ์ */
+    /* ล็อกห้ามหน้ากระดาษฉีกกลางเวลาพิมพ์ */
     .title, .subtitle, .file-row, .meta, .thresh-heading, .thresholds, .notes { page-break-inside: avoid; }
     .data-table tr { page-break-inside: avoid; }
     thead { display: table-header-group; }
