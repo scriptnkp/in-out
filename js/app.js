@@ -23,10 +23,12 @@ function searchNetworkData() {
     }
 
     const cleanTarget = targetNetId.replace(/\.0$/, '');
+    
+    // ดึงข้อมูลและสร้างสำเนา (Clone) เพื่อให้แก้ไขจำนวนได้โดยไม่กระทบข้อมูลต้นฉบับ
     currentViewData = window.sapData.filter(item => {
         const net = String(item.network).trim().replace(/\.0$/, '');
         return net === cleanTarget;
-    });
+    }).map(item => ({ ...item }));
     
     selectedRows.clear();
     document.getElementById('actualWeight').value = '';
@@ -52,7 +54,7 @@ function renderResultTable() {
         return;
     }
 
-    // 🟢 กระจาย WBS และ โครงข่าย ลงในกล่อง Meta ด้านบนตาราง
+    // กระจาย WBS และ โครงข่าย ลงในกล่อง Meta ด้านบนตาราง
     const uniqueWBS = [...new Set(currentViewData.map(i => i.wbs))].join(', ');
     const networkVal = currentViewData[0].network;
     document.getElementById('header-wbs').innerText = uniqueWBS;
@@ -62,14 +64,14 @@ function renderResultTable() {
         const localWeightInfo = window.weightData ? window.weightData[item.materialCode] : null;
         const weightInfo = localWeightInfo || { weight: 0.00, unit: 'กก.' };
         
-        // 🟢 ใช้ปริมาณความต้องการ (reqQty) เป็นหลัก
+        // ใช้ปริมาณความต้องการ (reqQty) เป็นหลัก
         const qty = item.reqQty !== undefined ? item.reqQty : (item.diffQty || 0);
         const totalRowWeight = qty * weightInfo.weight;
         grandTotal += totalRowWeight;
 
         const isChecked = selectedRows.has(index) ? 'checked' : '';
 
-        // 🟢 ฝัง Class .col-code และ .col-name เพื่อให้ CSS ตัดคำยาวๆ ได้สมบูรณ์
+        // 🟢 เปลี่ยนช่องแสดงจำนวนเป็น <input type="number"> เพื่อให้คลิกแก้ไขได้ทันที
         tbody.innerHTML += `
             <tr class="${isChecked ? 'row-selected' : ''}">
                 <td class="no-print" style="text-align:center;">
@@ -78,9 +80,11 @@ function renderResultTable() {
                 <td style="text-align:center;">${index + 1}</td>
                 <td class="col-code">${item.materialCode}</td>
                 <td class="col-name">${item.description}</td>
-                <td class="num">${qty.toLocaleString()}</td>
+                <td class="num">
+                    <input type="number" class="qty-input" value="${qty}" step="any" min="0" oninput="updateItemQty(${index}, this.value)">
+                </td>
                 <td class="num">${weightInfo.weight.toFixed(3)}</td>
-                <td class="num bold">${totalRowWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td class="num bold" id="row-weight-${index}">${totalRowWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 <td style="text-align:center;">${weightInfo.unit}</td>
                 <td class="no-print action-col" style="text-align:center;">
                     <button onclick="removeItem(${index})" class="btn-delete-sm">ลบ</button>
@@ -94,6 +98,42 @@ function renderResultTable() {
     document.getElementById('result-card').classList.remove('hidden');
 }
 
+// 🟢 ฟังก์ชันใหม่: อัปเดตจำนวนและคำนวณน้ำหนักใหม่แบบ Real-time โดยไม่ต้องวาดตารางใหม่
+function updateItemQty(index, newVal) {
+    const qty = parseFloat(newVal) || 0;
+    
+    // อัปเดตค่าในตัวแปรข้อมูลปัจจุบัน
+    currentViewData[index].reqQty = qty;
+
+    // คำนวณน้ำหนักเฉพาะแถวที่กำลังแก้ไข
+    const item = currentViewData[index];
+    const localWeightInfo = window.weightData ? window.weightData[item.materialCode] : null;
+    const weightInfo = localWeightInfo || { weight: 0.00, unit: 'กก.' };
+    const totalRowWeight = qty * weightInfo.weight;
+
+    const rowWeightCell = document.getElementById(`row-weight-${index}`);
+    if (rowWeightCell) {
+        rowWeightCell.innerText = totalRowWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    // คำนวณยอดรวมสุทธิใหม่ทั้งหมด
+    let grandTotal = 0;
+    currentViewData.forEach(rowItem => {
+        const wInfo = (window.weightData && window.weightData[rowItem.materialCode]) ? window.weightData[rowItem.materialCode] : { weight: 0.00 };
+        const rQty = rowItem.reqQty !== undefined ? rowItem.reqQty : (rowItem.diffQty || 0);
+        grandTotal += rQty * wInfo.weight;
+    });
+
+    // อัปเดตตัวเลขท้ายตาราง และการ์ด 100% 90% 80%
+    document.getElementById('grand-total-val').innerText = grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    updateMetrics(grandTotal);
+
+    // หากมีการกรอกช่องตรวจสอบน้ำหนักจริงค้างไว้ ให้คำนวณผลลัพธ์ใหม่ด้วยทันที
+    if (document.getElementById('actualWeight').value !== '') {
+        runCheck();
+    }
+}
+
 // อัปเดตกล่องเปอร์เซ็นต์
 function updateMetrics(totalWeight) {
     const w100 = totalWeight;
@@ -105,7 +145,7 @@ function updateMetrics(totalWeight) {
     document.getElementById('weight-80').innerText = w80.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 }
 
-// 🟢 ฟังก์ชันตรวจสอบน้ำหนักจริง เทียบตามสไตล์ของไฟล์ตัวอย่าง
+// ฟังก์ชันตรวจสอบน้ำหนักจริง
 function runCheck() {
     const actual = parseFloat(document.getElementById('actualWeight').value);
     const box = document.getElementById('resultBox');
