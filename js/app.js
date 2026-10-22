@@ -71,17 +71,18 @@ function renderResultTable() {
 
         const isChecked = selectedRows.has(index) ? 'checked' : '';
 
-        // 🟢 เปลี่ยนช่องแสดงจำนวนเป็น <input type="number"> เพื่อให้คลิกแก้ไขได้ทันที
+        // 🟢 แยก <input class="no-print"> สำหรับหน้าเว็บ และ <span class="print-only"> สำหรับหน้าพิมพ์เพื่อความคมชัดสูงสุด
         tbody.innerHTML += `
             <tr class="${isChecked ? 'row-selected' : ''}">
-                <td class="no-print" style="text-align:center;">
+                <td class="no-print col-chk" style="text-align:center;">
                     <input type="checkbox" class="row-checkbox" data-index="${index}" onchange="toggleRowSelection(this)" ${isChecked}>
                 </td>
                 <td style="text-align:center;">${index + 1}</td>
                 <td class="col-code">${item.materialCode}</td>
                 <td class="col-name">${item.description}</td>
                 <td class="num">
-                    <input type="number" class="qty-input" value="${qty}" step="any" min="0" oninput="updateItemQty(${index}, this.value)">
+                    <input type="number" class="qty-input no-print" value="${qty}" step="any" min="0" oninput="updateItemQty(${index}, this.value)">
+                    <span class="print-only" id="print-qty-${index}">${qty.toLocaleString()}</span>
                 </td>
                 <td class="num">${weightInfo.weight.toFixed(3)}</td>
                 <td class="num bold" id="row-weight-${index}">${totalRowWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -98,14 +99,17 @@ function renderResultTable() {
     document.getElementById('result-card').classList.remove('hidden');
 }
 
-// 🟢 ฟังก์ชันใหม่: อัปเดตจำนวนและคำนวณน้ำหนักใหม่แบบ Real-time โดยไม่ต้องวาดตารางใหม่
+// อัปเดตจำนวนและคำนวณน้ำหนักใหม่แบบ Real-time
 function updateItemQty(index, newVal) {
     const qty = parseFloat(newVal) || 0;
-    
-    // อัปเดตค่าในตัวแปรข้อมูลปัจจุบัน
     currentViewData[index].reqQty = qty;
 
-    // คำนวณน้ำหนักเฉพาะแถวที่กำลังแก้ไข
+    // อัปเดตตัวเลขสำหรับโหมดพิมพ์ด้วยทันที
+    const printQtySpan = document.getElementById(`print-qty-${index}`);
+    if (printQtySpan) {
+        printQtySpan.innerText = qty.toLocaleString();
+    }
+
     const item = currentViewData[index];
     const localWeightInfo = window.weightData ? window.weightData[item.materialCode] : null;
     const weightInfo = localWeightInfo || { weight: 0.00, unit: 'กก.' };
@@ -116,7 +120,6 @@ function updateItemQty(index, newVal) {
         rowWeightCell.innerText = totalRowWeight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
-    // คำนวณยอดรวมสุทธิใหม่ทั้งหมด
     let grandTotal = 0;
     currentViewData.forEach(rowItem => {
         const wInfo = (window.weightData && window.weightData[rowItem.materialCode]) ? window.weightData[rowItem.materialCode] : { weight: 0.00 };
@@ -124,11 +127,9 @@ function updateItemQty(index, newVal) {
         grandTotal += rQty * wInfo.weight;
     });
 
-    // อัปเดตตัวเลขท้ายตาราง และการ์ด 100% 90% 80%
     document.getElementById('grand-total-val').innerText = grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     updateMetrics(grandTotal);
 
-    // หากมีการกรอกช่องตรวจสอบน้ำหนักจริงค้างไว้ ให้คำนวณผลลัพธ์ใหม่ด้วยทันที
     if (document.getElementById('actualWeight').value !== '') {
         runCheck();
     }
